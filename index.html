@@ -1,0 +1,2336 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>PETUALANGAN ENERGI: Energi Fosil & Energi Alternatif - Kelas VI SD</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Three.js for 3D Interactive World & Mascot -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    
+    <!-- Google Fonts: Fredoka & Nunito for Friendly Kids 3D Game Typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary-blue: #0284c7;
+            --primary-green: #16a34a;
+            --primary-yellow: #eab308;
+            --primary-orange: #f97316;
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Nunito', sans-serif;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+            background: linear-gradient(180deg, #38bdf8 0%, #bae6fd 55%, #86efac 100%);
+            min-height: 100vh;
+            user-select: none;
+        }
+
+        h1, h2, h3, .font-game {
+            font-family: 'Fredoka', sans-serif;
+        }
+
+        /* 3D Canvas Background */
+        #bg-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: auto;
+        }
+
+        /* UI Layer above 3D Canvas */
+        #ui-layer {
+            position: relative;
+            z-index: 10;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            pointer-events: none;
+        }
+
+        .interactive-area {
+            pointer-events: auto;
+        }
+
+        /* 3D Extruded Game Text */
+        .text-3d-title {
+            text-shadow: 
+                0 3px 0 #0369a1,
+                0 6px 0 #075985,
+                0 10px 20px rgba(0, 0, 0, 0.25);
+        }
+
+        .text-3d-orange {
+            text-shadow: 
+                0 3px 0 #c2410c,
+                0 6px 0 #9a3412,
+                0 8px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .text-3d-green {
+            text-shadow: 
+                0 3px 0 #15803d,
+                0 5px 0 #166534,
+                0 8px 15px rgba(0, 0, 0, 0.18);
+        }
+
+        /* 3D Beveled Card Container */
+        .card-3d {
+            background: rgba(255, 255, 255, 0.93);
+            backdrop-filter: blur(12px);
+            border-radius: 28px;
+            border: 4px solid #ffffff;
+            box-shadow: 
+                0 10px 0 #cbd5e1,
+                0 18px 32px rgba(15, 23, 42, 0.22),
+                inset 0 4px 8px rgba(255, 255, 255, 0.9);
+            transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s ease;
+        }
+
+        .card-3d-blue {
+            background: linear-gradient(180deg, #ffffff 0%, #f0f9ff 100%);
+            border: 4px solid #7dd3fc;
+            box-shadow: 
+                0 10px 0 #0284c7,
+                0 18px 30px rgba(2, 132, 199, 0.25);
+        }
+
+        /* 3D Tactile Buttons */
+        .btn-3d {
+            position: relative;
+            border-radius: 20px;
+            font-family: 'Fredoka', sans-serif;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            transition: all 0.12s cubic-bezier(0.34, 1.56, 0.64, 1);
+            transform: translateY(0);
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .btn-3d:active:not(:disabled) {
+            transform: translateY(6px);
+        }
+
+        .btn-3d:disabled {
+            cursor: default;
+        }
+
+        .btn-3d-orange {
+            background: linear-gradient(180deg, #fb923c 0%, #f97316 100%);
+            color: #ffffff;
+            border: 3px solid #fed7aa;
+            box-shadow: 0 7px 0 #c2410c, 0 12px 20px rgba(234, 88, 12, 0.35);
+        }
+        .btn-3d-orange:hover:not(:disabled) {
+            background: linear-gradient(180deg, #fdba74 0%, #fb923c 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 9px 0 #c2410c, 0 15px 24px rgba(234, 88, 12, 0.4);
+        }
+        .btn-3d-orange:active:not(:disabled) {
+            transform: translateY(5px);
+            box-shadow: 0 2px 0 #c2410c, 0 4px 8px rgba(234, 88, 12, 0.3);
+        }
+
+        .btn-3d-green {
+            background: linear-gradient(180deg, #4ade80 0%, #22c55e 100%);
+            color: #ffffff;
+            border: 3px solid #bbf7d0;
+            box-shadow: 0 7px 0 #15803d, 0 12px 20px rgba(22, 163, 74, 0.35);
+        }
+        .btn-3d-green:hover:not(:disabled) {
+            background: linear-gradient(180deg, #86efac 0%, #4ade80 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 9px 0 #15803d, 0 15px 24px rgba(22, 163, 74, 0.4);
+        }
+        .btn-3d-green:active:not(:disabled) {
+            transform: translateY(5px);
+            box-shadow: 0 2px 0 #15803d, 0 4px 8px rgba(22, 163, 74, 0.3);
+        }
+
+        .btn-3d-blue {
+            background: linear-gradient(180deg, #38bdf8 0%, #0284c7 100%);
+            color: #ffffff;
+            border: 3px solid #bae6fd;
+            box-shadow: 0 7px 0 #0369a1, 0 12px 20px rgba(2, 132, 199, 0.35);
+        }
+        .btn-3d-blue:hover:not(:disabled) {
+            background: linear-gradient(180deg, #7dd3fc 0%, #0ea5e9 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 9px 0 #0369a1, 0 15px 24px rgba(2, 132, 199, 0.4);
+        }
+        .btn-3d-blue:active:not(:disabled) {
+            transform: translateY(5px);
+            box-shadow: 0 2px 0 #0369a1, 0 4px 8px rgba(2, 132, 199, 0.3);
+        }
+
+        .btn-3d-yellow {
+            background: linear-gradient(180deg, #fde047 0%, #eab308 100%);
+            color: #713f12;
+            border: 3px solid #fef08a;
+            box-shadow: 0 7px 0 #a16207, 0 12px 20px rgba(202, 138, 4, 0.3);
+        }
+        .btn-3d-yellow:hover:not(:disabled) {
+            background: linear-gradient(180deg, #fef08a 0%, #facc15 100%);
+            transform: translateY(-2px);
+        }
+        .btn-3d-yellow:active:not(:disabled) {
+            transform: translateY(5px);
+            box-shadow: 0 2px 0 #a16207;
+        }
+
+        /* 3D Option Choice Buttons */
+        .option-btn-3d {
+            background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+            border: 3px solid #cbd5e1;
+            border-radius: 20px;
+            box-shadow: 0 6px 0 #94a3b8, 0 10px 16px rgba(15, 23, 42, 0.08);
+            transition: all 0.15s cubic-bezier(0.34, 1.56, 0.64, 1);
+            text-align: left;
+            cursor: pointer;
+        }
+
+        .option-btn-3d:hover:not(:disabled) {
+            border-color: #38bdf8;
+            background: linear-gradient(180deg, #f0f9ff 0%, #e0f2fe 100%);
+            transform: translateY(-3px);
+            box-shadow: 0 9px 0 #0284c7, 0 14px 20px rgba(2, 132, 199, 0.18);
+        }
+
+        .option-btn-3d:active:not(:disabled) {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 #0284c7;
+        }
+
+        .option-btn-3d.correct-choice {
+            background: linear-gradient(180deg, #dcfce7 0%, #86efac 100%) !important;
+            border-color: #16a34a !important;
+            box-shadow: 0 6px 0 #15803d, 0 12px 24px rgba(22, 163, 74, 0.35) !important;
+            color: #14532d !important;
+            transform: scale(1.02);
+        }
+
+        .option-btn-3d.wrong-choice {
+            background: linear-gradient(180deg, #ffedd5 0%, #fed7aa 100%) !important;
+            border-color: #f97316 !important;
+            box-shadow: 0 6px 0 #c2410c, 0 10px 20px rgba(249, 115, 22, 0.25) !important;
+            color: #7c2d12 !important;
+        }
+
+        .option-btn-3d.dimmed-choice {
+            opacity: 0.65;
+            transform: scale(0.99);
+        }
+
+        /* Animations */
+        @keyframes floatSlow {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-8px) rotate(1.5deg); }
+        }
+
+        @keyframes pulseGlow {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(250, 204, 21, 0.6); }
+            50% { box-shadow: 0 0 0 12px rgba(250, 204, 21, 0); }
+        }
+
+        @keyframes shakeGentle {
+            0%, 100% { transform: translateX(0); }
+            20% { transform: translateX(-8px); }
+            40% { transform: translateX(8px); }
+            60% { transform: translateX(-6px); }
+            80% { transform: translateX(6px); }
+        }
+
+        @keyframes popIn {
+            0% { opacity: 0; transform: scale(0.85) translateY(20px); }
+            100% { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        @keyframes slideQuestionIn {
+            0% { opacity: 0; transform: translateX(40px) scale(0.96); }
+            100% { opacity: 1; transform: translateX(0) scale(1); }
+        }
+
+        @keyframes trophySpin {
+            0%, 100% { transform: translateY(0) rotate(-3deg) scale(1); }
+            50% { transform: translateY(-10px) rotate(3deg) scale(1.06); }
+        }
+
+        .animate-float {
+            animation: floatSlow 3.5s ease-in-out infinite;
+        }
+
+        .animate-shake {
+            animation: shakeGentle 0.45s ease-in-out;
+        }
+
+        .animate-pop-in {
+            animation: popIn 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+
+        .animate-question-in {
+            animation: slideQuestionIn 0.4s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+
+        .animate-trophy {
+            animation: trophySpin 2.8s ease-in-out infinite;
+        }
+
+        /* Custom Range Sliders for Audio Settings */
+        input[type=range].game-slider {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 14px;
+            border-radius: 999px;
+            background: #e2e8f0;
+            border: 2px solid #cbd5e1;
+            outline: none;
+        }
+
+        input[type=range].game-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: linear-gradient(180deg, #fde047 0%, #f97316 100%);
+            border: 3px solid #ffffff;
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+            cursor: pointer;
+            transition: transform 0.15s;
+        }
+
+        input[type=range].game-slider::-webkit-slider-thumb:hover {
+            transform: scale(1.15);
+        }
+
+        /* Confetti Overlay Canvas */
+        #confetti-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 50;
+        }
+
+        /* Mascot Container */
+        #mascot-canvas-box {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 35% 30%, #e0f2fe 0%, #38bdf8 65%, #0284c7 100%);
+            border: 4px solid #ffffff;
+            box-shadow: 0 8px 0 #0369a1, 0 14px 24px rgba(0, 0, 0, 0.22);
+            overflow: hidden;
+            position: relative;
+        }
+
+        @media (max-width: 640px) {
+            #mascot-canvas-box {
+                width: 112px;
+                height: 112px;
+            }
+        }
+    </style>
+</head>
+<body class="text-slate-800">
+
+    <!-- 3D Energy World Background Canvas -->
+    <canvas id="bg-canvas"></canvas>
+
+    <!-- Celebration Confetti & Stars Canvas -->
+    <canvas id="confetti-canvas"></canvas>
+
+    <!-- Main Interactive UI Layer -->
+    <div id="ui-layer" class="min-h-screen flex flex-col justify-between p-3 sm:p-5 md:p-6">
+
+        <!-- TOP BAR: Audio Controls & Quick Info -->
+        <header class="w-full max-w-5xl mx-auto flex items-center justify-between gap-2 interactive-area z-20">
+            <!-- Brand Mini Badge -->
+            <div class="flex items-center gap-2 bg-white/90 backdrop-blur-md px-3.5 py-2 rounded-2xl border-2 border-sky-200 shadow-md">
+                <span class="text-2xl">⚡</span>
+                <div class="leading-tight">
+                    <span class="font-game font-bold text-sky-700 text-sm sm:text-base block">PETUALANGAN ENERGI</span>
+                    <span class="text-[11px] font-bold text-emerald-600 hidden sm:block">IPA Kelas VI SD</span>
+                </div>
+            </div>
+
+            <!-- Audio Quick Controls -->
+            <div class="flex items-center gap-2">
+                <!-- Music Quick Toggle Button -->
+                <button id="btn-music-toggle" onclick="toggleMusicPlayPause()" title="Putar / Jeda Musik Latar"
+                    class="btn-3d btn-3d-yellow px-3 py-2 text-sm sm:text-base rounded-2xl">
+                    <span id="music-icon">🎵</span>
+                    <span id="music-label" class="hidden md:inline text-xs font-extrabold">Musik: Siap</span>
+                </button>
+
+                <!-- Mute All Quick Button -->
+                <button id="btn-mute-toggle" onclick="toggleMuteAll()" title="Bisukan / Nyalakan Semua Suara"
+                    class="btn-3d btn-3d-blue px-3 py-2 text-sm sm:text-base rounded-2xl">
+                    <span id="mute-icon">🔊</span>
+                </button>
+
+                <!-- Open Sound Settings Modal Button -->
+                <button onclick="openAudioModal()" title="Pengaturan Volume Suara"
+                    class="btn-3d btn-3d-green px-3.5 py-2 text-sm sm:text-base rounded-2xl">
+                    <span>🎚️</span>
+                    <span class="hidden sm:inline text-xs sm:text-sm">Suara</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- MAIN SCREENS CONTAINER -->
+        <main class="w-full max-w-4xl mx-auto my-auto py-4 interactive-area">
+
+            <!-- ==========================================
+                 SCREEN 1: LOGIN / WELCOME SCREEN
+                 ========================================== -->
+            <section id="screen-login" class="animate-pop-in">
+                <div class="card-3d p-6 sm:p-8 md:p-10 text-center relative overflow-hidden">
+                    <!-- Decorative Corner Badges -->
+                    <div class="hidden sm:flex items-center gap-1.5 absolute top-4 left-5 bg-amber-100 text-amber-800 px-3 py-1 rounded-full text-xs font-extrabold border-2 border-amber-300">
+                        <span>☀️</span> Energi Alternatif
+                    </div>
+                    <div class="hidden sm:flex items-center gap-1.5 absolute top-4 right-5 bg-sky-100 text-sky-800 px-3 py-1 rounded-full text-xs font-extrabold border-2 border-sky-300">
+                        <span>🛢️</span> Energi Fosil
+                    </div>
+
+                    <!-- 3D Mascot Welcome Stage -->
+                    <div class="flex flex-col items-center justify-center mb-3">
+                        <div id="login-mascot-slot" class="animate-float mb-2">
+                            <!-- Mascot Canvas is mounted here dynamically -->
+                        </div>
+                        <div class="bg-sky-100 border-2 border-sky-300 text-sky-800 px-4 py-1.5 rounded-2xl text-xs sm:text-sm font-extrabold shadow-sm">
+                            👋 Hai! Aku <span class="text-orange-600">Kapten Volt</span>, pemandu petualanganmu!
+                        </div>
+                    </div>
+
+                    <!-- 3D Main Title -->
+                    <h1 class="font-game text-3xl sm:text-5xl md:text-6xl font-bold text-sky-500 text-3d-title tracking-wide leading-tight mb-2">
+                        PETUALANGAN ENERGI
+                    </h1>
+                    <div class="inline-block bg-gradient-to-r from-emerald-500 via-teal-500 to-sky-500 text-white font-game font-semibold text-sm sm:text-lg px-5 py-1.5 rounded-full shadow-md mb-5">
+                        ENERGI FOSIL DAN ENERGI ALTERNATIF • KELAS VI SD
+                    </div>
+
+                    <!-- Kotak Kata-Kata Penyambutan Visual di Halaman Awal -->
+                    <div class="max-w-2xl mx-auto mb-6 bg-gradient-to-br from-amber-50 via-yellow-50 to-sky-50 border-4 border-amber-300 rounded-3xl p-4 sm:p-5 shadow-[0_6px_0_#f59e0b] text-left relative">
+                        <div class="flex items-start gap-3 sm:gap-4">
+                            <div class="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-gradient-to-b from-orange-400 to-orange-500 text-white text-2xl flex items-center justify-center shrink-0 shadow-md border-2 border-white">
+                                💬
+                            </div>
+                            <div class="flex-1">
+                                <div class="flex flex-wrap items-center justify-between gap-2 mb-1">
+                                    <span class="font-game font-bold text-orange-600 text-sm sm:text-base">
+                                        Sambutan Kapten Volt:
+                                    </span>
+                                    <button type="button" onclick="playWelcomeGreeting()"
+                                        class="btn-3d btn-3d-yellow px-3 py-1 text-xs rounded-xl">
+                                        <span>🔊</span>
+                                        <span>Dengar Sambutan</span>
+                                    </button>
+                                </div>
+                                <p class="text-slate-700 font-extrabold text-sm sm:text-base leading-relaxed">
+                                    "Halo, selamat datang di Petualangan Energi! Senang sekali kamu bisa bergabung. Yuk, kita belajar sambil bermain dan menjawab pertanyaan tentang energi fosil dan energi alternatif. Ayo tunjukkan kemampuan terbaikmu!"
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Student Name Input Box -->
+                    <div class="max-w-md mx-auto mb-6">
+                        <label for="student-name-input" class="block text-slate-700 font-extrabold text-base sm:text-lg mb-2">
+                            ✨ Siapa nama penjelajah hebat hari ini?
+                        </label>
+                        <div id="input-wrapper" class="relative">
+                            <input type="text" id="student-name-input" maxlength="28" autocomplete="off"
+                                placeholder="Ketik nama lengkap atau panggilanmu..."
+                                onkeypress="if(event.key === 'Enter') startAdventure()"
+                                class="w-full px-5 py-4 text-center text-lg sm:text-xl font-extrabold text-slate-800 bg-sky-50/90 border-4 border-sky-300 rounded-2xl focus:outline-none focus:border-orange-400 focus:bg-white shadow-inner transition-all placeholder:text-slate-400 placeholder:font-semibold">
+                        </div>
+                        <!-- Friendly Validation Message (No browser alert) -->
+                        <p id="name-error-msg" class="hidden mt-2 text-orange-600 font-extrabold text-sm bg-orange-50 border-2 border-orange-200 rounded-xl py-1.5 px-3">
+                            🌟 Yuk, tuliskan namamu terlebih dahulu sebelum memulai petualangan!
+                        </p>
+                    </div>
+
+                    <!-- Start 3D CTA Button -->
+                    <button id="btn-start-adventure" onclick="startAdventure()"
+                        class="btn-3d btn-3d-orange text-xl sm:text-2xl px-8 sm:px-12 py-4 sm:py-5 rounded-3xl w-full sm:w-auto">
+                        <span>🚀</span>
+                        <span>MULAI PETUALANGAN</span>
+                    </button>
+
+                    <!-- Mini Info Footer -->
+                    <div class="mt-6 flex flex-wrap items-center justify-center gap-3 text-xs sm:text-sm font-bold text-slate-500">
+                        <span class="bg-slate-100 px-3 py-1 rounded-xl">🎯 10 Soal Seru</span>
+                        <span class="bg-slate-100 px-3 py-1 rounded-xl">🗣️ Suara Pemandu Bahasa Indonesia</span>
+                        <span class="bg-slate-100 px-3 py-1 rounded-xl">🏆 Piala Juara 3D</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ==========================================
+                 SCREEN 2: INTERACTIVE QUIZ SCREEN
+                 ========================================== -->
+            <section id="screen-quiz" class="hidden">
+                <!-- Quiz HUD Header -->
+                <div class="card-3d-blue rounded-3xl p-4 sm:p-5 mb-4">
+                    <div class="flex flex-wrap items-center justify-between gap-3 mb-3">
+                        <!-- Student Badge -->
+                        <div class="flex items-center gap-2.5 bg-white px-3.5 py-2 rounded-2xl border-2 border-sky-200 shadow-sm">
+                            <span class="text-xl">🧑‍🚀</span>
+                            <div>
+                                <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Penjelajah</div>
+                                <div id="hud-student-name" class="font-game font-bold text-sky-700 text-sm sm:text-base truncate max-w-[140px] sm:max-w-[200px]">Siswa</div>
+                            </div>
+                        </div>
+
+                        <!-- Question Counter & Score -->
+                        <div class="flex items-center gap-2 sm:gap-3">
+                            <div class="bg-amber-100 border-2 border-amber-300 px-3.5 py-1.5 rounded-2xl text-center">
+                                <div class="text-[10px] font-extrabold text-amber-700 uppercase">Soal</div>
+                                <div id="hud-question-num" class="font-game font-bold text-amber-900 text-base sm:text-lg">1 / 10</div>
+                            </div>
+                            <div class="bg-emerald-100 border-2 border-emerald-300 px-3.5 py-1.5 rounded-2xl text-center">
+                                <div class="text-[10px] font-extrabold text-emerald-700 uppercase">Poin</div>
+                                <div id="hud-score" class="font-game font-bold text-emerald-800 text-base sm:text-lg">0</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 10-Segment 3D Progress Bar -->
+                    <div class="w-full bg-sky-900/15 p-1.5 rounded-2xl border-2 border-sky-200">
+                        <div id="progress-segments" class="grid grid-cols-10 gap-1.5 h-3.5 sm:h-4">
+                            <!-- 10 segments generated via JS -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Banner Kata-Kata Penyambutan saat Mulai Bermain -->
+                <div id="quiz-welcome-banner" class="card-3d bg-gradient-to-r from-amber-50 via-yellow-50 to-sky-50 border-4 border-amber-300 p-4 sm:p-5 mb-4 animate-pop-in">
+                    <div class="flex flex-col sm:flex-row items-center justify-between gap-3">
+                        <div class="flex items-start sm:items-center gap-3 text-center sm:text-left">
+                            <span class="text-3xl sm:text-4xl shrink-0">📣</span>
+                            <p id="quiz-welcome-text" class="text-slate-800 font-extrabold text-xs sm:text-sm md:text-base leading-relaxed">
+                                "Halo, selamat datang di Petualangan Energi! Senang sekali kamu bisa bergabung. Yuk, kita belajar sambil bermain dan menjawab pertanyaan tentang energi fosil dan energi alternatif. Ayo tunjukkan kemampuan terbaikmu!"
+                            </p>
+                        </div>
+                        <div class="flex items-center gap-2 shrink-0">
+                            <button type="button" onclick="playWelcomeGreeting()"
+                                class="btn-3d btn-3d-yellow px-3 py-1.5 text-xs rounded-xl" title="Putar Ulang Suara Sambutan">
+                                <span>🔊</span>
+                                <span>Ulangi Suara</span>
+                            </button>
+                            <button type="button" onclick="dismissWelcomeBanner()"
+                                class="w-8 h-8 rounded-xl bg-white/80 hover:bg-amber-200 text-slate-600 font-extrabold text-sm border-2 border-amber-300 flex items-center justify-center transition" title="Tutup Banner">
+                                ✕
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Main Question & Mascot Stage -->
+                <div id="question-card-container" class="card-3d p-5 sm:p-7 md:p-8">
+                    <div class="flex flex-col md:flex-row items-center md:items-start gap-4 sm:gap-6 mb-6">
+                        <!-- Mascot Slot + Speech Bubble -->
+                        <div class="flex flex-row md:flex-col items-center gap-3 shrink-0">
+                            <div id="quiz-mascot-slot"></div>
+                            <div id="mascot-status-pill" class="bg-sky-100 text-sky-800 border-2 border-sky-300 px-3 py-1 rounded-full text-xs font-extrabold text-center shadow-sm">
+                                🤔 Ayo berpikir!
+                            </div>
+                        </div>
+
+                        <!-- Question Content -->
+                        <div class="flex-1 text-center md:text-left">
+                            <div class="inline-flex items-center gap-1.5 bg-gradient-to-r from-orange-500 to-amber-500 text-white text-xs sm:text-sm font-extrabold px-3.5 py-1 rounded-full shadow-sm mb-3">
+                                <span id="question-topic-icon">⚡</span>
+                                <span id="question-topic-label">Materi Energi</span>
+                            </div>
+                            <h2 id="question-text" class="font-game text-xl sm:text-2xl md:text-[26px] font-bold text-slate-800 leading-snug">
+                                Memuat pertanyaan...
+                            </h2>
+                        </div>
+                    </div>
+
+                    <!-- 4 Multiple Choice 3D Buttons (A, B, C, D) -->
+                    <div id="options-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4">
+                        <!-- Options injected by JS -->
+                    </div>
+
+                    <!-- FEEDBACK & APPRECIATION PANEL (Appears after answer locked) -->
+                    <div id="feedback-panel" class="hidden mt-6 rounded-3xl p-5 sm:p-6 border-4 transition-all animate-pop-in">
+                        <div class="flex flex-col sm:flex-row items-center sm:items-start gap-4">
+                            <div id="feedback-badge-icon" class="text-5xl sm:text-6xl shrink-0 animate-bounce">🌟</div>
+                            <div class="flex-1 text-center sm:text-left">
+                                <h3 id="feedback-headline" class="font-game text-2xl sm:text-3xl font-bold mb-1">
+                                    HEBAT! JAWABANMU BENAR!
+                                </h3>
+                                <p id="feedback-submessage" class="font-extrabold text-sm sm:text-base mb-3">
+                                    Wah, hebat sekali! Jawabanmu benar. Pertahankan semangat belajarmu, ya!
+                                </p>
+                                <!-- Educational Explanation Box -->
+                                <div class="bg-white/90 rounded-2xl p-3.5 sm:p-4 border-2 border-slate-200/80 text-slate-700 text-sm sm:text-base font-bold leading-relaxed shadow-inner">
+                                    <span class="text-sky-700 font-extrabold block mb-0.5">💡 Tahukah Kamu?</span>
+                                    <span id="feedback-explanation">Penjelasan materi akan muncul di sini.</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Next Question / Finish Button -->
+                        <div class="mt-5 flex justify-center sm:justify-end">
+                            <button id="btn-next-question" onclick="nextQuestion()"
+                                class="btn-3d btn-3d-blue text-lg sm:text-xl px-7 py-3.5 rounded-2xl w-full sm:w-auto">
+                                <span id="btn-next-label">SOAL BERIKUTNYA</span>
+                                <span>➡️</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ==========================================
+                 SCREEN 3: FINAL RESULTS 3D SCREEN
+                 ========================================== -->
+            <section id="screen-result" class="hidden">
+                <div class="card-3d p-6 sm:p-8 md:p-10 text-center animate-pop-in relative overflow-hidden">
+                    <!-- 3D Golden Trophy & Stars Showcase -->
+                    <div class="relative inline-block mb-3">
+                        <div class="text-7xl sm:text-8xl animate-trophy drop-shadow-xl">🏆</div>
+                        <span class="absolute -top-2 -left-6 text-3xl animate-pulse">⭐</span>
+                        <span class="absolute -top-1 -right-6 text-3xl animate-pulse">🌟</span>
+                        <span class="absolute bottom-0 -right-8 text-2xl animate-bounce">✨</span>
+                    </div>
+
+                    <div id="result-rank-badge" class="inline-block bg-gradient-to-r from-amber-400 via-yellow-400 to-orange-400 text-amber-950 font-game font-bold text-sm sm:text-base px-5 py-1.5 rounded-full border-2 border-white shadow-md mb-2">
+                        🎖️ JUARA ENERGI MASA DEPAN
+                    </div>
+
+                    <h2 id="result-thanks-title" class="font-game text-2xl sm:text-4xl font-bold text-sky-600 text-3d-title mb-2">
+                        Terima Kasih, Penjelajah Hebat!
+                    </h2>
+                    <p id="result-motivation-text" class="text-slate-600 font-bold text-base sm:text-lg max-w-xl mx-auto mb-6">
+                        Kamu telah menyelesaikan seluruh tantangan Petualangan Energi!
+                    </p>
+
+                    <!-- 3D Scoreboard Cards -->
+                    <div class="grid grid-cols-3 gap-3 sm:gap-5 max-w-2xl mx-auto mb-7">
+                        <!-- Correct Count -->
+                        <div class="bg-gradient-to-b from-emerald-50 to-emerald-100 border-4 border-emerald-300 rounded-3xl p-3.5 sm:p-5 shadow-[0_7px_0_#15803d]">
+                            <div class="text-2xl sm:text-3xl mb-1">✅</div>
+                            <div class="text-xs sm:text-sm font-extrabold text-emerald-700 uppercase">Benar</div>
+                            <div id="res-correct-count" class="font-game text-3xl sm:text-4xl font-bold text-emerald-600">0</div>
+                        </div>
+
+                        <!-- Final Score (0-100) -->
+                        <div class="bg-gradient-to-b from-amber-50 to-yellow-100 border-4 border-amber-400 rounded-3xl p-3.5 sm:p-5 shadow-[0_7px_0_#b45309] transform -translate-y-2">
+                            <div class="text-2xl sm:text-3xl mb-1">🌟</div>
+                            <div class="text-xs sm:text-sm font-extrabold text-amber-800 uppercase">Nilai Akhir</div>
+                            <div id="res-final-score" class="font-game text-4xl sm:text-5xl font-bold text-orange-600">100</div>
+                        </div>
+
+                        <!-- Wrong Count -->
+                        <div class="bg-gradient-to-b from-orange-50 to-orange-100 border-4 border-orange-300 rounded-3xl p-3.5 sm:p-5 shadow-[0_7px_0_#c2410c]">
+                            <div class="text-2xl sm:text-3xl mb-1">💪</div>
+                            <div class="text-xs sm:text-sm font-extrabold text-orange-700 uppercase">Belum Tepat</div>
+                            <div id="res-wrong-count" class="font-game text-3xl sm:text-4xl font-bold text-orange-600">0</div>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons: Replay & Home -->
+                    <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+                        <button onclick="replayQuiz()"
+                            class="btn-3d btn-3d-green text-lg sm:text-xl px-8 py-4 rounded-2xl w-full sm:w-auto">
+                            <span>🔄</span>
+                            <span>ULANGI KUIS</span>
+                        </button>
+                        <button onclick="returnToHome()"
+                            class="btn-3d btn-3d-blue text-lg sm:text-xl px-8 py-4 rounded-2xl w-full sm:w-auto">
+                            <span>🏠</span>
+                            <span>KEMBALI KE BERANDA</span>
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+
+        <!-- FOOTER -->
+        <footer class="w-full max-w-4xl mx-auto text-center text-xs sm:text-sm font-bold text-sky-950/80 py-2">
+            🌍 Media Pembelajaran Interaktif IPA Kelas VI SD • Sentuh & Geser Layar untuk Melihat Dunia Energi 3D
+        </footer>
+    </div>
+
+    <!-- ==========================================
+         AUDIO SETTINGS MODAL (3 SEPARATE SLIDERS)
+         ========================================== -->
+    <div id="audio-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
+        <div class="card-3d max-w-md w-full p-6 sm:p-7 animate-pop-in relative">
+            <div class="flex items-center justify-between mb-5">
+                <div class="flex items-center gap-2.5">
+                    <span class="text-3xl">🎚️</span>
+                    <h3 class="font-game text-2xl font-bold text-sky-700">Pengaturan Suara</h3>
+                </div>
+                <button onclick="closeAudioModal()"
+                    class="w-10 h-10 rounded-full bg-slate-100 hover:bg-rose-100 text-slate-600 hover:text-rose-600 font-extrabold text-xl flex items-center justify-center border-2 border-slate-200 transition">
+                    ✕
+                </button>
+            </div>
+
+            <!-- Music Play / Pause / Mute Bar -->
+            <div class="bg-sky-50 border-2 border-sky-200 rounded-2xl p-3.5 mb-5 flex items-center justify-between gap-2">
+                <div class="flex items-center gap-2">
+                    <span class="text-2xl">🎶</span>
+                    <div>
+                        <div class="font-extrabold text-slate-800 text-sm">Musik Latar Ceria</div>
+                        <div id="modal-music-status" class="text-xs font-bold text-sky-600">Siap diputar</div>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button onclick="toggleMusicPlayPause()" id="modal-btn-playpause"
+                        class="btn-3d btn-3d-yellow px-3.5 py-2 text-xs rounded-xl">
+                        ⏯️ Putar/Jeda
+                    </button>
+                    <button onclick="stopMusicCompletely()"
+                        class="btn-3d btn-3d-orange px-3 py-2 text-xs rounded-xl">
+                        ⏹️ Matikan
+                    </button>
+                </div>
+            </div>
+
+            <!-- 3 Independent Volume Sliders -->
+            <div class="space-y-5">
+                <!-- 1. Background Music Volume -->
+                <div>
+                    <div class="flex justify-between text-sm font-extrabold text-slate-700 mb-1.5">
+                        <span>🎵 Volume Musik Latar</span>
+                        <span id="val-vol-music" class="text-sky-600">45%</span>
+                    </div>
+                    <input type="range" id="slider-vol-music" min="0" max="100" value="45"
+                        oninput="updateVolumeSettings()" class="game-slider">
+                </div>
+
+                <!-- 2. Voice Narration / Welcome / Appreciation TTS Volume -->
+                <div>
+                    <div class="flex justify-between text-sm font-extrabold text-slate-700 mb-1.5">
+                        <span>🗣️ Volume Suara Pemandu (Narasi)</span>
+                        <span id="val-vol-voice" class="text-emerald-600">100%</span>
+                    </div>
+                    <input type="range" id="slider-vol-voice" min="0" max="100" value="100"
+                        oninput="updateVolumeSettings()" class="game-slider">
+                </div>
+
+                <!-- 3. Answer Sound Effects (SFX) Volume -->
+                <div>
+                    <div class="flex justify-between text-sm font-extrabold text-slate-700 mb-1.5">
+                        <span>🔔 Volume Efek Suara Jawaban</span>
+                        <span id="val-vol-sfx" class="text-orange-600">80%</span>
+                    </div>
+                    <input type="range" id="slider-vol-sfx" min="0" max="100" value="80"
+                        oninput="updateVolumeSettings()" class="game-slider">
+                </div>
+            </div>
+
+            <!-- Test Sound & Close -->
+            <div class="mt-6 flex items-center justify-between gap-3">
+                <button onclick="testVoiceAndSfx()" class="btn-3d btn-3d-green px-4 py-2.5 text-sm rounded-xl">
+                    🔊 Tes Suara
+                </button>
+                <button onclick="closeAudioModal()" class="btn-3d btn-3d-blue px-6 py-2.5 text-sm rounded-xl">
+                    Selesai ✓
+                </button>
+            </div>
+
+            <!-- Custom Audio File Uploader (Optional) -->
+            <div class="mt-5 pt-4 border-t-2 border-slate-200/80">
+                <div class="flex items-center justify-between gap-2">
+                    <div>
+                        <span class="text-xs font-extrabold text-slate-700 block">🎧 Punya Musik Sendiri? (Opsional)</span>
+                        <span id="custom-audio-name" class="text-[11px] font-bold text-slate-500">Menggunakan Musik Fanfare Petualangan Bawaan</span>
+                    </div>
+                    <label class="btn-3d btn-3d-yellow px-3 py-1.5 text-xs rounded-xl cursor-pointer shrink-0">
+                        <span>📂 Pilih MP3/WAV</span>
+                        <input type="file" id="custom-music-file" accept="audio/*" onchange="handleCustomMusicUpload(event)" class="hidden">
+                    </label>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==========================================
+         JAVASCRIPT: 3D WORLD, MASCOT, AUDIO & QUIZ
+         ========================================== -->
+    <script>
+        /**
+         * =================================================================
+         * 1. BANK SOAL KUIS IPA KELAS VI SD (10 SOAL MUDAH & JELAS)
+         * Materi: Pengertian, Contoh, Kelebihan & Kekurangan
+         * Energi Fosil dan Energi Alternatif
+         * =================================================================
+         */
+        const WELCOME_MESSAGE_TEXT = "Halo, selamat datang di Petualangan Energi! Senang sekali kamu bisa bergabung. Yuk, kita belajar sambil bermain dan menjawab pertanyaan tentang energi fosil dan energi alternatif. Ayo tunjukkan kemampuan terbaikmu!";
+
+        const QUIZ_QUESTIONS = [
+            {
+                topic: "Pengertian Energi Fosil",
+                icon: "⛏️",
+                question: "Apa yang dimaksud dengan energi fosil?",
+                options: [
+                    "Energi yang berasal dari sisa-sisa tumbuhan dan hewan purba yang tertimbun jutaan tahun",
+                    "Energi yang berasal dari tiupan angin kencang di pegunungan setiap hari",
+                    "Energi yang dihasilkan langsung oleh cahaya matahari di siang hari",
+                    "Energi yang berasal dari aliran air sungai dan air terjun"
+                ],
+                correctIndex: 0,
+                explanation: "Energi fosil adalah sumber energi yang terbentuk dari sisa-sisa makhluk hidup purba yang terkubur di dalam bumi selama jutaan tahun."
+            },
+            {
+                topic: "Pengertian Energi Alternatif",
+                icon: "🌱",
+                question: "Apa yang dimaksud dengan energi alternatif?",
+                options: [
+                    "Energi yang berasal dari pembakaran batu bara dan minyak tanah",
+                    "Energi pengganti bahan bakar fosil yang berasal dari alam dan dapat diperbarui",
+                    "Energi yang hanya bisa dipakai satu kali lalu langsung habis",
+                    "Energi yang tersimpan di dalam tangki bensin kendaraan"
+                ],
+                correctIndex: 1,
+                explanation: "Energi alternatif adalah energi pengganti bahan bakar fosil yang bersumber dari alam, dapat diperbarui, dan lebih ramah lingkungan."
+            },
+            {
+                topic: "Contoh Energi Fosil",
+                icon: "🛢️",
+                question: "Manakah di bawah ini yang merupakan contoh sumber energi fosil?",
+                options: [
+                    "Sinar matahari, angin, dan air terjun",
+                    "Batu bara, minyak bumi, dan gas alam",
+                    "Panas bumi, gelombang laut, dan angin",
+                    "Cahaya matahari, air sungai, dan biogas"
+                ],
+                correctIndex: 1,
+                explanation: "Contoh utama energi fosil adalah batu bara, minyak bumi (bahan pembuat bensin dan solar), serta gas alam."
+            },
+            {
+                topic: "Contoh Energi Alternatif",
+                icon: "☀️",
+                question: "Berikut ini yang termasuk contoh sumber energi alternatif adalah...",
+                options: [
+                    "Bensin, solar, dan batu bara",
+                    "Minyak tanah, avtur, dan gas alam",
+                    "Matahari, angin, air, dan panas bumi",
+                    "Batu bara, bensin, dan minyak bumi"
+                ],
+                correctIndex: 2,
+                explanation: "Matahari (surya), angin, air, dan panas bumi merupakan contoh sumber energi alternatif yang melimpah di alam."
+            },
+            {
+                topic: "Pemanfaatan Energi Alternatif",
+                icon: "🔋",
+                question: "Alat yang digunakan untuk mengubah energi cahaya matahari menjadi energi listrik disebut...",
+                options: [
+                    "Panel surya",
+                    "Kompor gas",
+                    "Mesin diesel",
+                    "Tangki minyak"
+                ],
+                correctIndex: 0,
+                explanation: "Panel surya menangkap cahaya matahari dan mengubahnya secara langsung menjadi energi listrik untuk rumah dan sekolah."
+            },
+            {
+                topic: "Kelebihan Energi Fosil",
+                icon: "⚡",
+                question: "Salah satu kelebihan energi fosil (seperti bensin dan batu bara) sehingga masih banyak digunakan adalah...",
+                options: [
+                    "Tidak akan pernah habis meskipun dipakai setiap detik",
+                    "Menghasilkan tenaga yang besar dan mudah digunakan pada kendaraan maupun pembangkit listrik",
+                    "Tidak menghasilkan asap sama sekali saat dibakar",
+                    "Bisa dibuat sendiri di rumah dalam waktu satu jam"
+                ],
+                correctIndex: 1,
+                explanation: "Kelebihan energi fosil adalah mampu menghasilkan energi dalam jumlah besar dan teknologinya sudah siap dipakai pada kendaraan serta mesin."
+            },
+            {
+                topic: "Kekurangan Energi Fosil",
+                icon: "🌫️",
+                question: "Apa kekurangan utama dari penggunaan energi fosil secara terus-menerus?",
+                options: [
+                    "Jumlahnya terbatas sehingga bisa habis dan asapnya menyebabkan polusi udara",
+                    "Membuat udara di kota menjadi semakin sejuk dan bersih",
+                    "Hanya bisa digunakan saat cuaca sedang hujan deras",
+                    "Energinya terlalu lemah untuk menggerakkan mobil atau motor"
+                ],
+                correctIndex: 0,
+                explanation: "Kekurangan energi fosil yaitu jumlahnya terbatas (tidak dapat diperbarui) serta menghasilkan asap polusi yang mencemari udara."
+            },
+            {
+                topic: "Kelebihan Energi Alternatif",
+                icon: "♻️",
+                question: "Mengapa energi alternatif seperti matahari dan angin sangat baik untuk bumi kita?",
+                options: [
+                    "Karena dapat diperbarui, tidak akan habis, dan ramah lingkungan (bebas polusi)",
+                    "Karena menghasilkan banyak asap hitam di langit",
+                    "Karena hanya tersedia di dalam tanah yang sangat dalam",
+                    "Karena harganya selalu lebih mahal dari batu bara"
+                ],
+                correctIndex: 0,
+                explanation: "Kelebihan energi alternatif adalah ketersediaannya yang melimpah di alam (dapat diperbarui) dan tidak menimbulkan polusi udara."
+            },
+            {
+                topic: "Kekurangan Energi Alternatif",
+                icon: "⛅",
+                question: "Salah satu kekurangan energi alternatif (seperti energi surya dan angin) adalah...",
+                options: [
+                    "Menyebabkan pencemaran udara yang sangat parah",
+                    "Bergantung pada kondisi cuaca atau alam dan biaya pemasangan alat awalnya cukup mahal",
+                    "Akan langsung habis dalam waktu satu minggu",
+                    "Tidak bisa diubah menjadi energi listrik"
+                ],
+                correctIndex: 1,
+                explanation: "Energi alternatif bergantung pada kondisi alam (misalnya panel surya butuh sinar matahari cerah) dan biaya awal pemasangan alatnya masih cukup tinggi."
+            },
+            {
+                topic: "Kesimpulan Hemat Energi",
+                icon: "🌍",
+                question: "Mengapa kita perlu menghemat energi fosil dan mulai beralih ke energi alternatif?",
+                options: [
+                    "Agar cadangan energi fosil tidak cepat habis dan lingkungan bumi tetap bersih serta sehat",
+                    "Agar bahan bakar minyak cepat habis dari permukaan bumi",
+                    "Supaya polusi udara di sekitar kita semakin bertambah banyak",
+                    "Karena energi alternatif tidak membutuhkan sinar matahari atau angin"
+                ],
+                correctIndex: 0,
+                explanation: "Dengan menghemat energi fosil dan beralih ke energi alternatif, kita menjaga ketersediaan energi masa depan sekaligus melindungi bumi dari polusi!"
+            }
+        ];
+
+        /**
+         * =================================================================
+         * 2. STATE APLIKASI KUIS
+         * =================================================================
+         */
+// ... existing code ... -->
+        /**
+         * =================================================================
+         * 3. SISTEM AUDIO LENGKAP (CHEERFUL FANFARE ADVENTURE MUSIC + TTS)
+         * - Musik Latar Fanfare & Game Show Ceria (~132 BPM):
+         *   Brass/Terompet Fanfare + Marimba Arpeggio + Bouncy Bass + Drum Ceria
+         * - Mendukung unggah file audio MP3/WAV opsional dari pengguna
+         * - Efek Suara (SFX) Jawaban Benar & Salah (Lembut)
+         * - Text-to-Speech Bahasa Indonesia Suara Perempuan Ramah
+         * - Auto-Ducking: Musik mengecil otomatis saat narasi berbicara
+         * =================================================================
+         */
+        const audioState = {
+            ctx: null,
+            musicGain: null,
+            sfxGain: null,
+            musicVolume: 0.55,
+            voiceVolume: 1.0,
+            sfxVolume: 0.85,
+            isMusicPlaying: false,
+            isMusicPaused: false,
+            isMutedAll: false,
+            isSpeaking: false,
+            musicTimer: null,
+            beatStep: 0,
+            indonesianFemaleVoice: null,
+            customAudioEl: null,
+            customSourceNode: null,
+            usingCustomFile: false
+        };
+
+        // Initialize Web Audio Context safely on first user gesture
+        function initWebAudio() {
+            if (!audioState.ctx) {
+                const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                audioState.ctx = new AudioCtx();
+
+                audioState.musicGain = audioState.ctx.createGain();
+                audioState.musicGain.gain.value = getEffectiveMusicGain();
+                audioState.musicGain.connect(audioState.ctx.destination);
+
+                audioState.sfxGain = audioState.ctx.createGain();
+                audioState.sfxGain.gain.value = getEffectiveSfxGain();
+                audioState.sfxGain.connect(audioState.ctx.destination);
+            }
+            if (audioState.ctx.state === 'suspended') {
+                audioState.ctx.resume();
+            }
+        }
+
+        function getEffectiveMusicGain() {
+            if (audioState.isMutedAll || !audioState.isMusicPlaying || audioState.isMusicPaused) return 0;
+            // Auto-ducking: lower music to 20% while TTS voice is speaking so narration is crystal clear
+            const duckFactor = audioState.isSpeaking ? 0.20 : 1.0;
+            return audioState.musicVolume * 0.42 * duckFactor;
+        }
+
+        function getEffectiveSfxGain() {
+            if (audioState.isMutedAll) return 0;
+            return audioState.sfxVolume * 0.65;
+        }
+
+        function applyGainLevels() {
+            if (audioState.musicGain && audioState.ctx) {
+                audioState.musicGain.gain.setTargetAtTime(getEffectiveMusicGain(), audioState.ctx.currentTime, 0.08);
+            }
+            if (audioState.sfxGain && audioState.ctx) {
+                audioState.sfxGain.gain.setTargetAtTime(getEffectiveSfxGain(), audioState.ctx.currentTime, 0.05);
+            }
+            if (audioState.customAudioEl) {
+                const duckFactor = audioState.isSpeaking ? 0.22 : 1.0;
+                audioState.customAudioEl.volume = (audioState.isMutedAll || audioState.isMusicPaused)
+                    ? 0
+                    : Math.min(1, audioState.musicVolume * duckFactor);
+            }
+        }
+
+        // Handle optional MP3/WAV file upload from user
+        function handleCustomMusicUpload(event) {
+            const file = event.target.files && event.target.files[0];
+            if (!file) return;
+
+            initWebAudio();
+            if (audioState.musicTimer) {
+                clearInterval(audioState.musicTimer);
+                audioState.musicTimer = null;
+            }
+            if (audioState.customAudioEl) {
+                audioState.customAudioEl.pause();
+            }
+
+            const fileUrl = URL.createObjectURL(file);
+            const audioEl = new Audio(fileUrl);
+            audioEl.loop = true;
+            audioState.customAudioEl = audioEl;
+            audioState.usingCustomFile = true;
+
+            document.getElementById('custom-audio-name').textContent = `🎵 Aktif: ${file.name}`;
+            startBackgroundMusic();
+        }
+
+        // Cheerful TV Game-Show & Adventure Fanfare Loop (32 eighth-note steps @ ~132 BPM)
+        // Combines triumphant brass/horn lead, marimba arpeggios, bouncy bass, and upbeat percussion
+        const FANFARE_BRASS_LEAD = [
+            // Bar 1-2: Triumphant C Major Fanfare (Ta-da-da-daa!)
+            523.25, 0,      659.25, 783.99, 1046.50, 1046.50, 783.99, 0,
+            880.00, 0,      1046.50,880.00, 783.99,  783.99,  659.25, 0,
+            // Bar 3-4: Lively Adventure Response (G -> C Resolve)
+            587.33, 0,      783.99, 880.00, 987.77,  987.77,  783.99, 0,
+            1046.50,783.99, 659.25, 783.99, 1046.50, 1046.50, 1046.50,0
+        ];
+
+        const MARIMBA_ARPEGGIO = [
+            523.25, 659.25, 783.99, 1046.50, 783.99, 659.25, 523.25, 659.25,
+            587.33, 698.46, 880.00, 1046.50, 880.00, 698.46, 587.33, 698.46,
+            493.88, 587.33, 783.99, 987.77,  783.99, 587.33, 493.88, 587.33,
+            523.25, 659.25, 783.99, 1046.50, 1318.51,1046.50,783.99, 659.25
+        ];
+
+        const BOUNCY_BASS_LINE = [
+            130.81, 0, 196.00, 0, 130.81, 0, 196.00, 164.81,
+            174.61, 0, 220.00, 0, 174.61, 0, 220.00, 196.00,
+            196.00, 0, 246.94, 0, 196.00, 0, 246.94, 220.00,
+            130.81, 0, 196.00, 164.81, 130.81, 130.81, 196.00, 0
+        ];
+
+        function triggerSynthBrassNote(freq, now, duration) {
+            if (!freq) return;
+            // Dual detuned sawtooth + triangle filtered for warm, bright game-show horn/brass
+            const osc1 = audioState.ctx.createOscillator();
+            const osc2 = audioState.ctx.createOscillator();
+            const filter = audioState.ctx.createBiquadFilter();
+            const gain = audioState.ctx.createGain();
+
+            osc1.type = 'sawtooth';
+            osc2.type = 'triangle';
+            osc1.frequency.setValueAtTime(freq, now);
+            osc2.frequency.setValueAtTime(freq * 1.003, now);
+
+            filter.type = 'lowpass';
+            filter.frequency.setValueAtTime(1400, now);
+            filter.frequency.exponentialRampToValueAtTime(3200, now + 0.04);
+            filter.frequency.exponentialRampToValueAtTime(1600, now + duration);
+
+            gain.gain.setValueAtTime(0.001, now);
+            gain.gain.exponentialRampToValueAtTime(0.26, now + 0.025);
+            gain.gain.setValueAtTime(0.22, now + duration * 0.7);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+
+            osc1.connect(filter);
+            osc2.connect(filter);
+            filter.connect(gain);
+            gain.connect(audioState.musicGain);
+
+            osc1.start(now);
+            osc2.start(now);
+            osc1.stop(now + duration + 0.02);
+            osc2.stop(now + duration + 0.02);
+        }
+
+        function triggerMarimbaPluck(freq, now) {
+            if (!freq) return;
+            const osc = audioState.ctx.createOscillator();
+            const gain = audioState.ctx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(freq, now);
+
+            gain.gain.setValueAtTime(0.001, now);
+            gain.gain.exponentialRampToValueAtTime(0.22, now + 0.012);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.19);
+
+            osc.connect(gain);
+            gain.connect(audioState.musicGain);
+            osc.start(now);
+            osc.stop(now + 0.21);
+        }
+
+        function triggerBouncyBass(freq, now) {
+            if (!freq) return;
+            const osc = audioState.ctx.createOscillator();
+            const gain = audioState.ctx.createGain();
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(freq, now);
+
+            gain.gain.setValueAtTime(0.001, now);
+            gain.gain.exponentialRampToValueAtTime(0.32, now + 0.02);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.22);
+
+            osc.connect(gain);
+            gain.connect(audioState.musicGain);
+            osc.start(now);
+            osc.stop(now + 0.24);
+        }
+
+        function triggerLightPercussion(step, now) {
+            // Kick punch on beats 0, 4, 8, 12... and crisp hi-hat/snare snap on off-beats
+            if (step % 4 === 0) {
+                const kick = audioState.ctx.createOscillator();
+                const kGain = audioState.ctx.createGain();
+                kick.type = 'sine';
+                kick.frequency.setValueAtTime(135, now);
+                kick.frequency.exponentialRampToValueAtTime(48, now + 0.11);
+
+                kGain.gain.setValueAtTime(0.30, now);
+                kGain.gain.exponentialRampToValueAtTime(0.001, now + 0.13);
+
+                kick.connect(kGain);
+                kGain.connect(audioState.musicGain);
+                kick.start(now);
+                kick.stop(now + 0.14);
+            } else if (step % 2 === 1) {
+                // Crisp tambourine / hi-hat tick
+                const hat = audioState.ctx.createOscillator();
+                const hGain = audioState.ctx.createGain();
+                hat.type = 'square';
+                hat.frequency.setValueAtTime(step % 4 === 2 ? 1800 : 3400, now);
+
+                hGain.gain.setValueAtTime(0.045, now);
+                hGain.gain.exponentialRampToValueAtTime(0.001, now + 0.045);
+
+                hat.connect(hGain);
+                hGain.connect(audioState.musicGain);
+                hat.start(now);
+                hat.stop(now + 0.05);
+            }
+        }
+
+        function startBackgroundMusic() {
+            initWebAudio();
+            audioState.isMusicPlaying = true;
+            audioState.isMusicPaused = false;
+            applyGainLevels();
+            updateMusicUI();
+
+            // If user uploaded their own MP3/WAV file, play that
+            if (audioState.usingCustomFile && audioState.customAudioEl) {
+                audioState.customAudioEl.play().catch(() => {});
+                return;
+            }
+
+            if (audioState.musicTimer) clearInterval(audioState.musicTimer);
+
+            // ~132 BPM eighth-note interval = 225ms per step
+            audioState.musicTimer = setInterval(() => {
+                if (!audioState.isMusicPlaying || audioState.isMusicPaused || audioState.isMutedAll) return;
+                if (!audioState.ctx || audioState.ctx.state !== 'running') return;
+
+                const now = audioState.ctx.currentTime;
+                const step = audioState.beatStep % FANFARE_BRASS_LEAD.length;
+
+                const brassFreq = FANFARE_BRASS_LEAD[step];
+                const marimbaFreq = MARIMBA_ARPEGGIO[step];
+                const bassFreq = BOUNCY_BASS_LINE[step];
+
+                // Sustain brass slightly longer when next step is a rest (0)
+                const nextStep = (step + 1) % FANFARE_BRASS_LEAD.length;
+                const brassDur = FANFARE_BRASS_LEAD[nextStep] === 0 ? 0.36 : 0.20;
+
+                triggerSynthBrassNote(brassFreq, now, brassDur);
+                triggerMarimbaPluck(marimbaFreq, now);
+                triggerBouncyBass(bassFreq, now);
+                triggerLightPercussion(step, now);
+
+                audioState.beatStep++;
+            }, 225);
+        }
+
+        function toggleMusicPlayPause() {
+            initWebAudio();
+            if (!audioState.isMusicPlaying) {
+                startBackgroundMusic();
+                return;
+            }
+            audioState.isMusicPaused = !audioState.isMusicPaused;
+            if (audioState.usingCustomFile && audioState.customAudioEl) {
+                if (audioState.isMusicPaused) {
+                    audioState.customAudioEl.pause();
+                } else {
+                    audioState.customAudioEl.play().catch(() => {});
+                }
+            }
+            applyGainLevels();
+            updateMusicUI();
+        }
+
+        function stopMusicCompletely() {
+            if (audioState.musicTimer) clearInterval(audioState.musicTimer);
+            audioState.musicTimer = null;
+            if (audioState.customAudioEl) {
+                audioState.customAudioEl.pause();
+                audioState.customAudioEl.currentTime = 0;
+            }
+            audioState.isMusicPlaying = false;
+            audioState.isMusicPaused = false;
+            applyGainLevels();
+            updateMusicUI();
+        }
+
+        function toggleMuteAll() {
+            initWebAudio();
+            audioState.isMutedAll = !audioState.isMutedAll;
+            if (audioState.isMutedAll && 'speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                audioState.isSpeaking = false;
+            }
+            applyGainLevels();
+            updateMusicUI();
+        }
+
+        function updateMusicUI() {
+            const musicIcon = document.getElementById('music-icon');
+            const musicLabel = document.getElementById('music-label');
+            const muteIcon = document.getElementById('mute-icon');
+            const modalStatus = document.getElementById('modal-music-status');
+
+            muteIcon.textContent = audioState.isMutedAll ? '🔇' : '🔊';
+
+            if (!audioState.isMusicPlaying) {
+                musicIcon.textContent = '🎵';
+                musicLabel.textContent = 'Musik: Mati';
+                if (modalStatus) modalStatus.textContent = 'Musik dimatikan';
+            } else if (audioState.isMusicPaused) {
+                musicIcon.textContent = '⏸️';
+                musicLabel.textContent = 'Musik: Jeda';
+                if (modalStatus) modalStatus.textContent = 'Musik dijeda';
+            } else {
+                musicIcon.textContent = '🎶';
+                musicLabel.textContent = 'Musik: Aktif';
+                if (modalStatus) modalStatus.textContent = 'Sedang berputar ceria';
+            }
+        }
+
+        // Cheerful Success Fanfare SFX
+        function playCorrectSfx() {
+            initWebAudio();
+            if (audioState.isMutedAll || audioState.sfxVolume <= 0) return;
+            const now = audioState.ctx.currentTime;
+            const notes = [523.25, 659.25, 783.99, 1046.50]; // C5 - E5 - G5 - C6 ascending chime
+            notes.forEach((freq, i) => {
+                const osc = audioState.ctx.createOscillator();
+                const gain = audioState.ctx.createGain();
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(freq, now + i * 0.09);
+
+                gain.gain.setValueAtTime(0.001, now + i * 0.09);
+                gain.gain.exponentialRampToValueAtTime(0.65, now + i * 0.09 + 0.03);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.09 + 0.42);
+
+                osc.connect(gain);
+                gain.connect(audioState.sfxGain);
+                osc.start(now + i * 0.09);
+                osc.stop(now + i * 0.09 + 0.45);
+            });
+        }
+
+        // Gentle Warm Encouraging SFX (Not harsh buzzer)
+        function playWrongSfx() {
+            initWebAudio();
+            if (audioState.isMutedAll || audioState.sfxVolume <= 0) return;
+            const now = audioState.ctx.currentTime;
+            // Soft warm two-note gentle chime (E4 -> G4)
+            const notes = [392.00, 329.63, 392.00];
+            notes.forEach((freq, i) => {
+                const osc = audioState.ctx.createOscillator();
+                const gain = audioState.ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(freq, now + i * 0.14);
+
+                gain.gain.setValueAtTime(0.001, now + i * 0.14);
+                gain.gain.exponentialRampToValueAtTime(0.45, now + i * 0.14 + 0.04);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.14 + 0.35);
+
+                osc.connect(gain);
+                gain.connect(audioState.sfxGain);
+                osc.start(now + i * 0.14);
+                osc.stop(now + i * 0.14 + 0.38);
+            });
+        }
+
+        // Indonesian Female Text-to-Speech Loader
+        function loadIndonesianVoice() {
+            if (!('speechSynthesis' in window)) return;
+            const voices = window.speechSynthesis.getVoices();
+            if (!voices.length) return;
+
+            // Prioritize Indonesian female voices (e.g., Google Bahasa Indonesia, Damayanti, Gadis)
+            const idVoices = voices.filter(v => v.lang.toLowerCase().includes('id'));
+            const femaleKeywords = ['female', 'perempuan', 'gadis', 'damayanti', 'google bahasa indonesia', 'siti', 'ayu'];
+
+            let chosen = idVoices.find(v =>
+                femaleKeywords.some(kw => v.name.toLowerCase().includes(kw))
+            );
+            if (!chosen && idVoices.length > 0) {
+                chosen = idVoices[0];
+            }
+            audioState.indonesianFemaleVoice = chosen || null;
+        }
+
+        if ('speechSynthesis' in window) {
+            loadIndonesianVoice();
+            window.speechSynthesis.onvoiceschanged = loadIndonesianVoice;
+        }
+
+        // Speak Indonesian Narration cleanly without overlapping
+        function speakIndonesian(text) {
+            if (!('speechSynthesis' in window)) return;
+            if (audioState.isMutedAll || audioState.voiceVolume <= 0) return;
+
+            // Cancel any ongoing speech immediately so voices never overlap
+            window.speechSynthesis.cancel();
+
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'id-ID';
+            if (audioState.indonesianFemaleVoice) {
+                utterance.voice = audioState.indonesianFemaleVoice;
+            }
+            // Friendly, clear, cheerful female tone
+            utterance.pitch = 1.14;
+            utterance.rate = 0.98;
+            utterance.volume = audioState.voiceVolume;
+
+            utterance.onstart = () => {
+                audioState.isSpeaking = true;
+                applyGainLevels();
+            };
+            utterance.onend = () => {
+                audioState.isSpeaking = false;
+                applyGainLevels();
+            };
+            utterance.onerror = () => {
+                audioState.isSpeaking = false;
+                applyGainLevels();
+            };
+
+            window.speechSynthesis.speak(utterance);
+        }
+
+        // Audio Settings Modal Controls
+        function openAudioModal() {
+            document.getElementById('audio-modal').classList.remove('hidden');
+        }
+
+        function closeAudioModal() {
+            document.getElementById('audio-modal').classList.add('hidden');
+        }
+
+        function updateVolumeSettings() {
+            const mVal = parseInt(document.getElementById('slider-vol-music').value, 10);
+            const vVal = parseInt(document.getElementById('slider-vol-voice').value, 10);
+            const sVal = parseInt(document.getElementById('slider-vol-sfx').value, 10);
+
+            audioState.musicVolume = mVal / 100;
+            audioState.voiceVolume = vVal / 100;
+            audioState.sfxVolume = sVal / 100;
+
+            document.getElementById('val-vol-music').textContent = `${mVal}%`;
+            document.getElementById('val-vol-voice').textContent = `${vVal}%`;
+            document.getElementById('val-vol-sfx').textContent = `${sVal}%`;
+
+            applyGainLevels();
+        }
+
+        function playWelcomeGreeting() {
+            initWebAudio();
+            if (!audioState.isMusicPlaying) {
+                startBackgroundMusic();
+            }
+            speakIndonesian(WELCOME_MESSAGE_TEXT);
+        }
+
+        function dismissWelcomeBanner() {
+            const banner = document.getElementById('quiz-welcome-banner');
+            if (banner) banner.classList.add('hidden');
+        }
+
+        function testVoiceAndSfx() {
+            playCorrectSfx();
+            setTimeout(() => {
+                speakIndonesian("Halo! Suara pemandu Petualangan Energi siap menemanimu belajar!");
+            }, 350);
+        }
+
+        /**
+         * =================================================================
+         * 4. 3D ENERGY WORLD BACKGROUND (THREE.JS)
+         * Sun, Rotating Earth, Wind Turbines, Solar Panels, Mountains,
+         * Trees, Coal & Oil Barrels, Floating Clouds
+         * =================================================================
+         */
+        let bgScene, bgCamera, bgRenderer;
+        let sunMesh, earthGroup, windBlades = [], cloudGroups = [], floatingProps = [];
+        let cameraTargetRotX = 0, cameraTargetRotY = 0;
+        let isDraggingBg = false, prevPointerX = 0, prevPointerY = 0;
+
+        function init3DBackground() {
+            const canvas = document.getElementById('bg-canvas');
+            bgScene = new THREE.Scene();
+            bgScene.fog = new THREE.FogExp2(0xbae6fd, 0.014);
+
+            bgCamera = new THREE.PerspectiveCamera(48, window.innerWidth / window.innerHeight, 0.1, 200);
+            bgCamera.position.set(0, 5.5, 22);
+            bgCamera.lookAt(0, 2, 0);
+
+            bgRenderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+            bgRenderer.setSize(window.innerWidth, window.innerHeight);
+            bgRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            bgRenderer.shadowMap.enabled = true;
+            bgRenderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+            // Lighting: Warm Sunlight + Sky Hemisphere Light
+            const hemiLight = new THREE.HemisphereLight(0xffffff, 0x4ade80, 0.85);
+            hemiLight.position.set(0, 30, 0);
+            bgScene.add(hemiLight);
+
+            const dirLight = new THREE.DirectionalLight(0xfffbeb, 1.15);
+            dirLight.position.set(14, 22, 12);
+            dirLight.castShadow = true;
+            dirLight.shadow.mapSize.width = 1024;
+            dirLight.shadow.mapSize.height = 1024;
+            bgScene.add(dirLight);
+
+            // 1. Glowing 3D Sun
+            const sunGeo = new THREE.SphereGeometry(2.3, 24, 24);
+            const sunMat = new THREE.MeshBasicMaterial({ color: 0xfde047 });
+            sunMesh = new THREE.Mesh(sunGeo, sunMat);
+            sunMesh.position.set(11, 11.5, -12);
+            bgScene.add(sunMesh);
+
+            // Sun Halo Ring
+            const haloGeo = new THREE.RingGeometry(2.6, 3.4, 32);
+            const haloMat = new THREE.MeshBasicMaterial({ color: 0xfef08a, side: THREE.DoubleSide, transparent: true, opacity: 0.55 });
+            const haloMesh = new THREE.Mesh(haloGeo, haloMat);
+            sunMesh.add(haloMesh);
+
+            // 2. Rolling Green Energy Island Ground
+            const groundGeo = new THREE.CylinderGeometry(24, 26, 4, 48);
+            const groundMat = new THREE.MeshStandardMaterial({ color: 0x4ade80, roughness: 0.8 });
+            const ground = new THREE.Mesh(groundGeo, groundMat);
+            ground.position.set(0, -3.5, -2);
+            ground.receiveShadow = true;
+            bgScene.add(ground);
+
+            // 3. Stylized 3D Mountains in Background
+            const mountainColors = [0x16a34a, 0x15803d, 0x22c55e];
+            const mountainCoords = [
+                { x: -13, z: -14, r: 6.5, h: 10 },
+                { x: -4, z: -17, r: 8, h: 12.5 },
+                { x: 7, z: -16, r: 7.5, h: 11 },
+                { x: 15, z: -13, r: 6, h: 9 }
+            ];
+            mountainCoords.forEach((m, idx) => {
+                const mGeo = new THREE.ConeGeometry(m.r, m.h, 7);
+                const mMat = new THREE.MeshStandardMaterial({ color: mountainColors[idx % mountainColors.length], flatShading: true });
+                const mountain = new THREE.Mesh(mGeo, mMat);
+                mountain.position.set(m.x, m.h / 2 - 2.2, m.z);
+                mountain.receiveShadow = true;
+                bgScene.add(mountain);
+
+                // Snow/Cloud Cap on tall peaks
+                const capGeo = new THREE.ConeGeometry(m.r * 0.32, m.h * 0.3, 7);
+                const capMat = new THREE.MeshStandardMaterial({ color: 0xffffff, flatShading: true });
+                const cap = new THREE.Mesh(capGeo, capMat);
+                cap.position.set(m.x, m.h - 2.2 - (m.h * 0.14), m.z);
+                bgScene.add(cap);
+            });
+
+            // 4. Rotating 3D Earth Globe (Symbol of Clean Planet)
+            earthGroup = new THREE.Group();
+            earthGroup.position.set(-10.5, 6.2, -5);
+            const oceanGeo = new THREE.SphereGeometry(2.1, 24, 24);
+            const oceanMat = new THREE.MeshStandardMaterial({ color: 0x0284c7, roughness: 0.4 });
+            const ocean = new THREE.Mesh(oceanGeo, oceanMat);
+            earthGroup.add(ocean);
+
+            // Continents (Green patches)
+            const landMat = new THREE.MeshStandardMaterial({ color: 0x22c55e, roughness: 0.6 });
+            const landPositions = [
+                [0.9, 0.7, 1.6], [-1.1, 0.5, 1.5], [0.3, -0.9, 1.7], [1.4, -0.4, -1.3], [-0.9, 0.8, -1.5]
+            ];
+            landPositions.forEach(pos => {
+                const lGeo = new THREE.DodecahedronGeometry(0.75, 1);
+                const lMesh = new THREE.Mesh(lGeo, landMat);
+                lMesh.position.set(pos[0], pos[1], pos[2]);
+                earthGroup.add(lMesh);
+            });
+            bgScene.add(earthGroup);
+
+            // 5. Spinning 3D Wind Turbines (PLTB - Alternative Energy)
+            createWindTurbine(-8.5, -1.5, -4, 1.15);
+            createWindTurbine(-12.5, -1.5, -7, 0.95);
+            createWindTurbine(11.5, -1.5, -5, 1.1);
+
+            // 6. 3D Solar Panels (Panel Surya - Alternative Energy)
+            createSolarPanel(6.5, -1.4, 2.5, -0.35);
+            createSolarPanel(9.2, -1.4, 3.2, -0.45);
+
+            // 7. Fossil Energy Props: Oil Barrels & Coal Rocks (Left Front Zone)
+            createOilBarrel(-7.8, -1.0, 3.8, 0xf97316);
+            createOilBarrel(-6.5, -1.0, 4.4, 0xeab308);
+            createCoalCluster(-9.3, -1.3, 4.2);
+
+            // 8. Cute Low-Poly Trees
+            const treeSpots = [
+                [-4.5, -1.5, -6], [3.5, -1.5, -7], [13.5, -1.5, 1], [-14, -1.5, 0], [0, -1.5, -9]
+            ];
+            treeSpots.forEach(t => createLowPolyTree(t[0], t[1], t[2]));
+
+            // 9. Fluffy Floating 3D Clouds
+            for (let i = 0; i < 6; i++) {
+                createCloud(-16 + i * 6.5, 9 + (i % 3) * 1.4, -9 - (i % 2) * 3);
+            }
+
+            // Mouse & Touch Camera Parallax Interaction
+            canvas.addEventListener('pointerdown', (e) => {
+                isDraggingBg = true;
+                prevPointerX = e.clientX;
+                prevPointerY = e.clientY;
+            });
+            window.addEventListener('pointermove', (e) => {
+                if (!isDraggingBg) return;
+                const dx = e.clientX - prevPointerX;
+                const dy = e.clientY - prevPointerY;
+                prevPointerX = e.clientX;
+                prevPointerY = e.clientY;
+                cameraTargetRotY = Math.max(-0.35, Math.min(0.35, cameraTargetRotY + dx * 0.003));
+                cameraTargetRotX = Math.max(-0.15, Math.min(0.2, cameraTargetRotX + dy * 0.002));
+            });
+            window.addEventListener('pointerup', () => {
+                isDraggingBg = false;
+            });
+        }
+
+        function createWindTurbine(x, y, z, scale = 1) {
+            const group = new THREE.Group();
+            group.position.set(x, y, z);
+            group.scale.setScalar(scale);
+
+            // Tower
+            const towerGeo = new THREE.CylinderGeometry(0.14, 0.28, 5.2, 12);
+            const whiteMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.3 });
+            const tower = new THREE.Mesh(towerGeo, whiteMat);
+            tower.position.y = 2.6;
+            tower.castShadow = true;
+            group.add(tower);
+
+            // Hub
+            const hub = new THREE.Mesh(new THREE.SphereGeometry(0.28, 12, 12), new THREE.MeshStandardMaterial({ color: 0x0284c7 }));
+            hub.position.set(0, 5.2, 0.22);
+            group.add(hub);
+
+            // 3 Rotating Blades
+            const rotor = new THREE.Group();
+            rotor.position.set(0, 5.2, 0.28);
+            for (let i = 0; i < 3; i++) {
+                const bladePivot = new THREE.Group();
+                bladePivot.rotation.z = (i * Math.PI * 2) / 3;
+                const bladeGeo = new THREE.BoxGeometry(0.22, 2.3, 0.06);
+                const blade = new THREE.Mesh(bladeGeo, whiteMat);
+                blade.position.y = 1.15;
+                bladePivot.add(blade);
+                rotor.add(bladePivot);
+            }
+            group.add(rotor);
+            windBlades.push(rotor);
+            bgScene.add(group);
+        }
+
+        function createSolarPanel(x, y, z, rotY = 0) {
+            const group = new THREE.Group();
+            group.position.set(x, y, z);
+            group.rotation.y = rotY;
+
+            // Stand
+            const stand = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.12, 0.16, 1.3, 8),
+                new THREE.MeshStandardMaterial({ color: 0x64748b })
+            );
+            stand.position.y = 0.65;
+            group.add(stand);
+
+            // Tilted Blue Photovoltaic Board
+            const boardGroup = new THREE.Group();
+            boardGroup.position.y = 1.35;
+            boardGroup.rotation.x = 0.55;
+
+            const frame = new THREE.Mesh(
+                new THREE.BoxGeometry(2.3, 0.12, 1.5),
+                new THREE.MeshStandardMaterial({ color: 0xe2e8f0 })
+            );
+            boardGroup.add(frame);
+
+            const cells = new THREE.Mesh(
+                new THREE.BoxGeometry(2.1, 0.14, 1.3),
+                new THREE.MeshStandardMaterial({ color: 0x1d4ed8, metalness: 0.4, roughness: 0.2 })
+            );
+            boardGroup.add(cells);
+
+            group.add(boardGroup);
+            bgScene.add(group);
+        }
+
+        function createOilBarrel(x, y, z, colorHex) {
+            const barrelGroup = new THREE.Group();
+            barrelGroup.position.set(x, y, z);
+
+            const body = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.48, 0.48, 1.2, 16),
+                new THREE.MeshStandardMaterial({ color: colorHex, roughness: 0.35 })
+            );
+            body.castShadow = true;
+            barrelGroup.add(body);
+
+            // Dark metallic ribs
+            const ribMat = new THREE.MeshStandardMaterial({ color: 0x1e293b });
+            [-0.3, 0.3].forEach(ry => {
+                const rib = new THREE.Mesh(new THREE.TorusGeometry(0.49, 0.04, 8, 20), ribMat);
+                rib.rotation.x = Math.PI / 2;
+                rib.position.y = ry;
+                barrelGroup.add(rib);
+            });
+
+            bgScene.add(barrelGroup);
+            floatingProps.push({ mesh: barrelGroup, baseY: y, phase: x });
+        }
+
+        function createCoalCluster(x, y, z) {
+            const coalMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.85, flatShading: true });
+            const offsets = [[0, 0, 0, 0.55], [0.55, -0.1, 0.25, 0.42], [-0.45, -0.12, 0.3, 0.38]];
+            offsets.forEach(o => {
+                const rock = new THREE.Mesh(new THREE.DodecahedronGeometry(o[3], 0), coalMat);
+                rock.position.set(x + o[0], y + o[1], z + o[2]);
+                rock.castShadow = true;
+                bgScene.add(rock);
+            });
+        }
+
+        function createLowPolyTree(x, y, z) {
+            const tree = new THREE.Group();
+            tree.position.set(x, y, z);
+
+            const trunk = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.2, 0.28, 1.4, 8),
+                new THREE.MeshStandardMaterial({ color: 0x92400e })
+            );
+            trunk.position.y = 0.7;
+            tree.add(trunk);
+
+            const foliageMat = new THREE.MeshStandardMaterial({ color: 0x16a34a, flatShading: true });
+            const c1 = new THREE.Mesh(new THREE.ConeGeometry(1.15, 1.8, 7), foliageMat);
+            c1.position.y = 1.9;
+            tree.add(c1);
+
+            const c2 = new THREE.Mesh(new THREE.ConeGeometry(0.85, 1.5, 7), foliageMat);
+            c2.position.y = 2.9;
+            tree.add(c2);
+
+            bgScene.add(tree);
+        }
+
+        function createCloud(x, y, z) {
+            const cloud = new THREE.Group();
+            cloud.position.set(x, y, z);
+            const mat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.9 });
+            const puffs = [[0, 0, 0, 1.1], [0.95, -0.15, 0.1, 0.85], [-0.95, -0.2, 0, 0.8]];
+            puffs.forEach(p => {
+                const sphere = new THREE.Mesh(new THREE.SphereGeometry(p[3], 12, 12), mat);
+                sphere.position.set(p[0], p[1], p[2]);
+                cloud.add(sphere);
+            });
+            bgScene.add(cloud);
+            cloudGroups.push(cloud);
+        }
+
+        /**
+         * =================================================================
+         * 5. 3D FRIENDLY MASCOT CHARACTER ("KAPTEN VOLT" - THREE.JS)
+         * Dynamic Moods: 'welcome' | 'thinking' | 'celebrate' | 'encourage'
+         * =================================================================
+         */
+        let mascotScene, mascotCamera, mascotRenderer, mascotRoot;
+        let leftArm, rightArm, leftEye, rightEye, mascotAntennaBulb;
+        let mascotMood = 'welcome';
+        let mascotCanvasEl;
+
+        function init3DMascot() {
+            const box = document.createElement('div');
+            box.id = 'mascot-canvas-box';
+            mascotCanvasEl = document.createElement('canvas');
+            mascotCanvasEl.style.width = '100%';
+            mascotCanvasEl.style.height = '100%';
+            box.appendChild(mascotCanvasEl);
+
+            // Mount initially into Login Screen slot
+            document.getElementById('login-mascot-slot').appendChild(box);
+
+            mascotScene = new THREE.Scene();
+            mascotCamera = new THREE.PerspectiveCamera(40, 1, 0.1, 50);
+            mascotCamera.position.set(0, 0.4, 5.4);
+
+            mascotRenderer = new THREE.WebGLRenderer({ canvas: mascotCanvasEl, antialias: true, alpha: true });
+            mascotRenderer.setSize(150, 150);
+            mascotRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+            const amb = new THREE.AmbientLight(0xffffff, 0.85);
+            mascotScene.add(amb);
+            const keyLight = new THREE.DirectionalLight(0xffffff, 0.95);
+            keyLight.position.set(3, 5, 5);
+            mascotScene.add(keyLight);
+
+            mascotRoot = new THREE.Group();
+            mascotScene.add(mascotRoot);
+
+            // Cute Rounded Robot-Astronaut Head
+            const headMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.25 });
+            const head = new THREE.Mesh(new THREE.SphereGeometry(1.05, 24, 24), headMat);
+            head.position.y = 0.65;
+            mascotRoot.add(head);
+
+            // Visor Face Screen
+            const visorMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.15 });
+            const visor = new THREE.Mesh(new THREE.SphereGeometry(0.86, 24, 18), visorMat);
+            visor.scale.set(1.05, 0.72, 0.6);
+            visor.position.set(0, 0.65, 0.56);
+            mascotRoot.add(visor);
+
+            // Glowing Friendly Eyes
+            const eyeMat = new THREE.MeshBasicMaterial({ color: 0x38bdf8 });
+            leftEye = new THREE.Mesh(new THREE.SphereGeometry(0.15, 16, 16), eyeMat);
+            leftEye.position.set(-0.32, 0.7, 1.05);
+            mascotRoot.add(leftEye);
+
+            rightEye = new THREE.Mesh(new THREE.SphereGeometry(0.15, 16, 16), eyeMat);
+            rightEye.position.set(0.32, 0.7, 1.05);
+            mascotRoot.add(rightEye);
+
+            // Cute Smile Arc
+            const smileGeo = new THREE.TorusGeometry(0.18, 0.04, 8, 16, Math.PI);
+            const smileMat = new THREE.MeshBasicMaterial({ color: 0xfacc15 });
+            const smile = new THREE.Mesh(smileGeo, smileMat);
+            smile.rotation.z = Math.PI;
+            smile.position.set(0, 0.52, 1.06);
+            mascotRoot.add(smile);
+
+            // Ear Headphones (Orange & Yellow)
+            const earMat = new THREE.MeshStandardMaterial({ color: 0xf97316, roughness: 0.3 });
+            const leftEar = new THREE.Mesh(new THREE.CylinderGeometry(0.28, 0.28, 0.22, 16), earMat);
+            leftEar.rotation.z = Math.PI / 2;
+            leftEar.position.set(-1.05, 0.65, 0);
+            mascotRoot.add(leftEar);
+
+            const rightEar = new THREE.Mesh(new THREE.CylinderGeometry(0.28, 0.28, 0.22, 16), earMat);
+            rightEar.rotation.z = Math.PI / 2;
+            rightEar.position.set(1.05, 0.65, 0);
+            mascotRoot.add(rightEar);
+
+            // Energy Lightning Antenna on Top
+            const stem = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.05, 0.05, 0.45, 8),
+                new THREE.MeshStandardMaterial({ color: 0x94a3b8 })
+            );
+            stem.position.set(0, 1.82, 0);
+            mascotRoot.add(stem);
+
+            mascotAntennaBulb = new THREE.Mesh(
+                new THREE.SphereGeometry(0.18, 16, 16),
+                new THREE.MeshBasicMaterial({ color: 0xfacc15 })
+            );
+            mascotAntennaBulb.position.set(0, 2.08, 0);
+            mascotRoot.add(mascotAntennaBulb);
+
+            // Torso Suit (Green & Blue Eco-Energy Armor)
+            const body = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.68, 0.55, 0.95, 20),
+                new THREE.MeshStandardMaterial({ color: 0x22c55e, roughness: 0.35 })
+            );
+            body.position.set(0, -0.65, 0);
+            mascotRoot.add(body);
+
+            // Chest Core Emblem
+            const core = new THREE.Mesh(
+                new THREE.CircleGeometry(0.24, 16),
+                new THREE.MeshBasicMaterial({ color: 0xfef08a })
+            );
+            core.position.set(0, -0.62, 0.64);
+            mascotRoot.add(core);
+
+            // Waving Arms
+            const armMat = new THREE.MeshStandardMaterial({ color: 0x38bdf8, roughness: 0.3 });
+            leftArm = new THREE.Mesh(new THREE.CapsuleGeometry ? new THREE.SphereGeometry(0.24, 12, 12) : new THREE.SphereGeometry(0.24, 12, 12), armMat);
+            leftArm.scale.set(0.8, 1.5, 0.8);
+            leftArm.position.set(-0.92, -0.55, 0.15);
+            mascotRoot.add(leftArm);
+
+            rightArm = new THREE.Mesh(new THREE.SphereGeometry(0.24, 12, 12), armMat);
+            rightArm.scale.set(0.8, 1.5, 0.8);
+            rightArm.position.set(0.92, -0.55, 0.15);
+            mascotRoot.add(rightArm);
+        }
+
+        function setMascotMood(mood) {
+            mascotMood = mood;
+            if (!leftEye || !rightEye || !mascotAntennaBulb) return;
+
+            if (mood === 'celebrate') {
+                leftEye.material.color.setHex(0x4ade80);
+                rightEye.material.color.setHex(0x4ade80);
+                mascotAntennaBulb.material.color.setHex(0x4ade80);
+            } else if (mood === 'encourage') {
+                leftEye.material.color.setHex(0xfbbf24);
+                rightEye.material.color.setHex(0xfbbf24);
+                mascotAntennaBulb.material.color.setHex(0xf97316);
+            } else {
+                leftEye.material.color.setHex(0x38bdf8);
+                rightEye.material.color.setHex(0x38bdf8);
+                mascotAntennaBulb.material.color.setHex(0xfacc15);
+            }
+        }
+
+        /**
+         * =================================================================
+         * 6. CONFETTI & STARBURST CELEBRATION PARTICLE ENGINE
+         * =================================================================
+         */
+        const confettiCanvas = document.getElementById('confetti-canvas');
+        const confettiCtx = confettiCanvas.getContext('2d');
+        let particles = [];
+
+        function resizeConfettiCanvas() {
+            confettiCanvas.width = window.innerWidth;
+            confettiCanvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeConfettiCanvas);
+        resizeConfettiCanvas();
+
+        function triggerCelebrationParticles(amount = 85) {
+            const colors = ['#facc15', '#22c55e', '#38bdf8', '#f97316', '#ec4899', '#a855f7'];
+            for (let i = 0; i < amount; i++) {
+                particles.push({
+                    x: window.innerWidth * (0.2 + Math.random() * 0.6),
+                    y: window.innerHeight * 0.45,
+                    vx: (Math.random() - 0.5) * 16,
+                    vy: -Math.random() * 14 - 4,
+                    size: Math.random() * 9 + 6,
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    rotation: Math.random() * 360,
+                    rotSpeed: (Math.random() - 0.5) * 12,
+                    isStar: i % 3 === 0,
+                    life: 1.0
+                });
+            }
+        }
+
+        function drawStarShape(ctx, cx, cy, spikes, outerRadius, innerRadius, color) {
+            let rot = (Math.PI / 2) * 3;
+            let x = cx;
+            let y = cy;
+            const step = Math.PI / spikes;
+
+            ctx.beginPath();
+            ctx.moveTo(cx, cy - outerRadius);
+            for (let i = 0; i < spikes; i++) {
+                x = cx + Math.cos(rot) * outerRadius;
+                y = cy + Math.sin(rot) * outerRadius;
+                ctx.lineTo(x, y);
+                rot += step;
+
+                x = cx + Math.cos(rot) * innerRadius;
+                y = cy + Math.sin(rot) * innerRadius;
+                ctx.lineTo(x, y);
+                rot += step;
+            }
+            ctx.lineTo(cx, cy - outerRadius);
+            ctx.closePath();
+            ctx.fillStyle = color;
+            ctx.fill();
+        }
+
+        function updateAndDrawConfetti() {
+            confettiCtx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+            for (let i = particles.length - 1; i >= 0; i--) {
+                const p = particles[i];
+                p.x += p.vx;
+                p.y += p.vy;
+                p.vy += 0.36; // Gravity
+                p.vx *= 0.99;
+                p.rotation += p.rotSpeed;
+                p.life -= 0.011;
+
+                if (p.life <= 0 || p.y > confettiCanvas.height + 30) {
+                    particles.splice(i, 1);
+                    continue;
+                }
+
+                confettiCtx.save();
+                confettiCtx.globalAlpha = Math.max(0, p.life);
+                confettiCtx.translate(p.x, p.y);
+                confettiCtx.rotate((p.rotation * Math.PI) / 180);
+
+                if (p.isStar) {
+                    drawStarShape(confettiCtx, 0, 0, 5, p.size, p.size * 0.45, p.color);
+                } else {
+                    confettiCtx.fillStyle = p.color;
+                    confettiCtx.fillRect(-p.size / 2, -p.size / 3, p.size, p.size * 0.65);
+                }
+                confettiCtx.restore();
+            }
+        }
+
+        /**
+         * =================================================================
+         * 7. MAIN ANIMATION LOOP (WINDOW.ONLOAD)
+         * =================================================================
+         */
+        let clock = new THREE.Clock();
+
+        function animateLoop() {
+            requestAnimationFrame(animateLoop);
+            const elapsed = clock.getElapsedTime();
+
+            // 1. Animate 3D Energy World
+            if (bgScene && bgCamera && bgRenderer) {
+                if (sunMesh) {
+                    sunMesh.rotation.z = elapsed * 0.25;
+                    const pulse = 1 + Math.sin(elapsed * 2.5) * 0.04;
+                    sunMesh.scale.setScalar(pulse);
+                }
+                if (earthGroup) {
+                    earthGroup.rotation.y = elapsed * 0.45;
+                    earthGroup.position.y = 6.2 + Math.sin(elapsed * 1.6) * 0.28;
+                }
+                windBlades.forEach((rotor, idx) => {
+                    rotor.rotation.z = elapsed * (2.6 + idx * 0.35);
+                });
+                cloudGroups.forEach((cloud, idx) => {
+                    cloud.position.x += 0.012 + (idx % 2) * 0.005;
+                    if (cloud.position.x > 22) cloud.position.x = -22;
+                });
+                floatingProps.forEach(item => {
+                    item.mesh.position.y = item.baseY + Math.sin(elapsed * 2 + item.phase) * 0.06;
+                });
+
+                // Smooth camera parallax
+                bgCamera.position.x += (cameraTargetRotY * 14 - bgCamera.position.x) * 0.06;
+                bgCamera.position.y += ((5.5 + cameraTargetRotX * 8) - bgCamera.position.y) * 0.06;
+                bgCamera.lookAt(0, 2, -2);
+
+                bgRenderer.render(bgScene, bgCamera);
+            }
+
+            // 2. Animate 3D Mascot
+            if (mascotScene && mascotCamera && mascotRenderer && mascotRoot) {
+                if (mascotMood === 'celebrate') {
+                    mascotRoot.position.y = Math.abs(Math.sin(elapsed * 7)) * 0.42;
+                    mascotRoot.rotation.y = Math.sin(elapsed * 5) * 0.35;
+                    leftArm.rotation.z = 2.4 + Math.sin(elapsed * 12) * 0.3;
+                    rightArm.rotation.z = -2.4 - Math.sin(elapsed * 12) * 0.3;
+                } else if (mascotMood === 'encourage') {
+                    mascotRoot.position.y = Math.sin(elapsed * 3) * 0.1;
+                    mascotRoot.rotation.z = Math.sin(elapsed * 3.5) * 0.12;
+                    leftArm.rotation.z = 0.4;
+                    rightArm.rotation.z = -1.8 + Math.sin(elapsed * 6) * 0.35;
+                } else if (mascotMood === 'thinking') {
+                    mascotRoot.position.y = Math.sin(elapsed * 2.5) * 0.08;
+                    mascotRoot.rotation.y = Math.sin(elapsed * 1.8) * 0.22;
+                    leftArm.rotation.z = 0.35;
+                    rightArm.rotation.z = -0.35;
+                } else {
+                    // Welcome wave
+                    mascotRoot.position.y = Math.sin(elapsed * 3) * 0.12;
+                    mascotRoot.rotation.y = Math.sin(elapsed * 1.5) * 0.15;
+                    leftArm.rotation.z = 0.35;
+                    rightArm.rotation.z = -2.2 + Math.sin(elapsed * 8) * 0.45;
+                }
+                mascotRenderer.render(mascotScene, mascotCamera);
+            }
+
+            // 3. Animate Confetti
+            if (particles.length > 0) {
+                updateAndDrawConfetti();
+            }
+        }
+
+        window.addEventListener('resize', () => {
+            if (bgCamera && bgRenderer) {
+                bgCamera.aspect = window.innerWidth / window.innerHeight;
+                bgCamera.updateProjectionMatrix();
+                bgRenderer.setSize(window.innerWidth, window.innerHeight);
+            }
+        });
+
+        window.onload = function () {
+            init3DBackground();
+            init3DMascot();
+            loadIndonesianVoice();
+            animateLoop();
+        };
+
+        /**
+         * =================================================================
+         * 8. ALUR GAME & INTERAKSI KUIS
+         * =================================================================
+         */
+        function startAdventure() {
+            const inputEl = document.getElementById('student-name-input');
+            const errorMsgEl = document.getElementById('name-error-msg');
+            const wrapperEl = document.getElementById('input-wrapper');
+            const rawName = inputEl.value.trim();
+
+            if (!rawName) {
+                errorMsgEl.classList.remove('hidden');
+                wrapperEl.classList.remove('animate-shake');
+                void wrapperEl.offsetWidth; // trigger reflow
+                wrapperEl.classList.add('animate-shake');
+                inputEl.focus();
+                return;
+            }
+
+            errorMsgEl.classList.add('hidden');
+            studentName = rawName;
+
+            // Start upbeat fanfare instrumental music after user clicks Start
+            startBackgroundMusic();
+
+            // Show welcome banner on quiz screen and speak the exact welcome greeting
+            const welcomeBanner = document.getElementById('quiz-welcome-banner');
+            if (welcomeBanner) welcomeBanner.classList.remove('hidden');
+            speakIndonesian(WELCOME_MESSAGE_TEXT);
+
+            // Reset quiz state and open quiz screen
+            resetQuizData();
+            switchScreen('screen-quiz');
+
+            // Move 3D Mascot into Quiz Slot
+            const mascotBox = document.getElementById('mascot-canvas-box');
+            document.getElementById('quiz-mascot-slot').appendChild(mascotBox);
+            setMascotMood('thinking');
+
+            renderQuestion();
+        }
+
+        function resetQuizData() {
+            currentQuestionIdx = 0;
+            correctCount = 0;
+            wrongCount = 0;
+            answerHistory = new Array(QUIZ_QUESTIONS.length).fill(null);
+            isQuestionAnswered = false;
+
+            document.getElementById('hud-student-name').textContent = studentName;
+            document.getElementById('hud-score').textContent = '0';
+            buildProgressSegments();
+        }
+
+        function switchScreen(screenId) {
+            ['screen-login', 'screen-quiz', 'screen-result'].forEach(id => {
+                document.getElementById(id).classList.add('hidden');
+            });
+            document.getElementById(screenId).classList.remove('hidden');
+        }
+
+        function buildProgressSegments() {
+            const container = document.getElementById('progress-segments');
+            container.innerHTML = '';
+            for (let i = 0; i < QUIZ_QUESTIONS.length; i++) {
+                const seg = document.createElement('div');
+                seg.id = `prog-seg-${i}`;
+                seg.className = 'h-full rounded-full bg-white/60 transition-all duration-300';
+                container.appendChild(seg);
+            }
+            updateProgressSegments();
+        }
+
+        function updateProgressSegments() {
+            for (let i = 0; i < QUIZ_QUESTIONS.length; i++) {
+                const seg = document.getElementById(`prog-seg-${i}`);
+                if (!seg) continue;
+                const status = answerHistory[i];
+                if (status === 'correct') {
+                    seg.className = 'h-full rounded-full bg-emerald-500 shadow-[0_2px_0_#15803d] transition-all duration-300';
+                } else if (status === 'wrong') {
+                    seg.className = 'h-full rounded-full bg-orange-400 shadow-[0_2px_0_#c2410c] transition-all duration-300';
+                } else if (i === currentQuestionIdx) {
+                    seg.className = 'h-full rounded-full bg-amber-400 animate-pulse shadow-[0_2px_0_#b45309] transition-all duration-300';
+                } else {
+                    seg.className = 'h-full rounded-full bg-white/60 transition-all duration-300';
+                }
+            }
+        }
+
+        function renderQuestion() {
+            isQuestionAnswered = false;
+            const qData = QUIZ_QUESTIONS[currentQuestionIdx];
+
+            // Animate question card transition
+            const qCard = document.getElementById('question-card-container');
+            qCard.classList.remove('animate-question-in');
+            void qCard.offsetWidth;
+            qCard.classList.add('animate-question-in');
+
+            // Update HUD
+            document.getElementById('hud-question-num').textContent = `${currentQuestionIdx + 1} / ${QUIZ_QUESTIONS.length}`;
+            document.getElementById('question-topic-icon').textContent = qData.icon;
+            document.getElementById('question-topic-label').textContent = qData.topic;
+            document.getElementById('question-text').textContent = qData.question;
+
+            // Reset Mascot
+            setMascotMood('thinking');
+            const statusPill = document.getElementById('mascot-status-pill');
+            statusPill.textContent = '🤔 Pilih jawaban terbaikmu!';
+            statusPill.className = 'bg-sky-100 text-sky-800 border-2 border-sky-300 px-3 py-1 rounded-full text-xs font-extrabold text-center shadow-sm';
+
+            // Hide Feedback Panel
+            document.getElementById('feedback-panel').classList.add('hidden');
+
+            // Build A, B, C, D 3D Option Buttons
+            const letters = ['A', 'B', 'C', 'D'];
+            const badgeColors = [
+                'bg-sky-500 text-white',
+                'bg-emerald-500 text-white',
+                'bg-amber-400 text-amber-950',
+                'bg-orange-500 text-white'
+            ];
+
+            const optionsGrid = document.getElementById('options-grid');
+            optionsGrid.innerHTML = '';
+
+            qData.options.forEach((optText, idx) => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.id = `opt-btn-${idx}`;
+                btn.className = 'option-btn-3d p-4 sm:p-5 flex items-center gap-3.5 w-full';
+                btn.onclick = () => selectAnswer(idx);
+
+                btn.innerHTML = `
+                    <span class="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl ${badgeColors[idx]} font-game font-bold text-lg sm:text-xl flex items-center justify-center shrink-0 shadow-sm">
+                        ${letters[idx]}
+                    </span>
+                    <span class="font-extrabold text-slate-800 text-sm sm:text-base md:text-lg leading-snug">
+                        ${optText}
+                    </span>
+                `;
+                optionsGrid.appendChild(btn);
+            });
+
+            updateProgressSegments();
+        }
+
+        function selectAnswer(selectedIdx) {
+            // Lock answer immediately so it cannot be changed once confirmed
+            if (isQuestionAnswered) return;
+            isQuestionAnswered = true;
+
+            const qData = QUIZ_QUESTIONS[currentQuestionIdx];
+            const isCorrect = selectedIdx === qData.correctIndex;
+
+            // Disable all option buttons & apply visual states
+            for (let i = 0; i < qData.options.length; i++) {
+                const btn = document.getElementById(`opt-btn-${i}`);
+                btn.disabled = true;
+
+                if (i === qData.correctIndex) {
+                    btn.classList.add('correct-choice');
+                } else if (i === selectedIdx && !isCorrect) {
+                    btn.classList.add('wrong-choice');
+                } else {
+                    btn.classList.add('dimmed-choice');
+                }
+            }
+
+            const feedbackPanel = document.getElementById('feedback-panel');
+            const badgeIcon = document.getElementById('feedback-badge-icon');
+            const headline = document.getElementById('feedback-headline');
+            const submessage = document.getElementById('feedback-submessage');
+            const explanationEl = document.getElementById('feedback-explanation');
+            const statusPill = document.getElementById('mascot-status-pill');
+
+            explanationEl.textContent = qData.explanation;
+
+            if (isCorrect) {
+                correctCount++;
+                answerHistory[currentQuestionIdx] = 'correct';
+                document.getElementById('hud-score').textContent = correctCount * 10;
+
+                // Celebration Effects: Sound, Confetti, Stars, Mascot Jump
+                playCorrectSfx();
+                triggerCelebrationParticles(90);
+                setMascotMood('celebrate');
+
+                statusPill.textContent = '🎉 Yeay! Luar biasa!';
+                statusPill.className = 'bg-emerald-100 text-emerald-800 border-2 border-emerald-400 px-3 py-1 rounded-full text-xs font-extrabold text-center shadow-sm';
+
+                feedbackPanel.className = 'mt-6 rounded-3xl p-5 sm:p-6 border-4 border-emerald-400 bg-gradient-to-br from-emerald-50 via-green-50 to-yellow-50 shadow-[0_8px_0_#15803d] animate-pop-in';
+                badgeIcon.textContent = '🌟';
+                headline.textContent = 'HEBAT! JAWABANMU BENAR!';
+                headline.className = 'font-game text-2xl sm:text-3xl font-bold text-emerald-600 mb-1';
+                submessage.textContent = 'Wah, hebat sekali! Jawabanmu benar. Pertahankan semangat belajarmu, ya!';
+                submessage.className = 'font-extrabold text-emerald-800 text-sm sm:text-base mb-3';
+
+                // Exact Indonesian Female Appreciation Voice for Correct Answer
+                speakIndonesian("Wah, hebat sekali! Jawabanmu benar. Pertahankan semangat belajarmu, ya!");
+            } else {
+                wrongCount++;
+                answerHistory[currentQuestionIdx] = 'wrong';
+
+                // Warm Supportive Effects: Gentle SFX, Mascot Encouragement
+                playWrongSfx();
+                setMascotMood('encourage');
+
+                statusPill.textContent = '💪 Ayo tetap semangat!';
+                statusPill.className = 'bg-amber-100 text-amber-800 border-2 border-amber-400 px-3 py-1 rounded-full text-xs font-extrabold text-center shadow-sm';
+
+                feedbackPanel.className = 'mt-6 rounded-3xl p-5 sm:p-6 border-4 border-amber-400 bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-50 shadow-[0_8px_0_#d97706] animate-pop-in';
+                badgeIcon.textContent = '🤗';
+                headline.textContent = 'TETAP SEMANGAT!';
+                headline.className = 'font-game text-2xl sm:text-3xl font-bold text-orange-600 mb-1';
+                submessage.textContent = 'Tidak apa-apa, jangan menyerah! Terus belajar dan coba lagi di pertanyaan berikutnya. Kamu pasti bisa!';
+                submessage.className = 'font-extrabold text-amber-900 text-sm sm:text-base mb-3';
+
+                // Exact Indonesian Female Encouraging Voice for Wrong Answer
+                speakIndonesian("Tidak apa-apa, jangan menyerah! Terus belajar dan coba lagi di pertanyaan berikutnya. Kamu pasti bisa!");
+            }
+
+            // Update Next Button Text on Last Question
+            const nextBtnLabel = document.getElementById('btn-next-label');
+            if (currentQuestionIdx === QUIZ_QUESTIONS.length - 1) {
+                nextBtnLabel.textContent = 'LIHAT HASIL AKHIR 🏆';
+            } else {
+                nextBtnLabel.textContent = 'SOAL BERIKUTNYA';
+            }
+
+            updateProgressSegments();
+            feedbackPanel.classList.remove('hidden');
+
+            // Smoothly scroll feedback into view on smaller mobile screens
+            setTimeout(() => {
+                feedbackPanel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }, 120);
+        }
+
+        function nextQuestion() {
+            if (currentQuestionIdx < QUIZ_QUESTIONS.length - 1) {
+                currentQuestionIdx++;
+                renderQuestion();
+            } else {
+                showFinalResults();
+            }
+        }
+
+        function showFinalResults() {
+            switchScreen('screen-result');
+            const finalScore = correctCount * 10;
+
+            document.getElementById('res-correct-count').textContent = correctCount;
+            document.getElementById('res-wrong-count').textContent = wrongCount;
+            document.getElementById('res-final-score').textContent = finalScore;
+            document.getElementById('result-thanks-title').textContent = `Terima Kasih, ${studentName}!`;
+
+            const rankBadge = document.getElementById('result-rank-badge');
+            const motivationEl = document.getElementById('result-motivation-text');
+
+            let spokenResult = "";
+
+            if (finalScore >= 90) {
+                rankBadge.textContent = '👑 JUARA ENERGI MASA DEPAN';
+                motivationEl.textContent = `Luar biasa, ${studentName}! Kamu sangat menguasai materi energi fosil dan energi alternatif. Teruslah menjadi pelopor hemat energi di bumi!`;
+                spokenResult = `Selamat ${studentName}! Kamu meraih nilai ${finalScore} dan menjadi Juara Energi Masa Depan! Pengetahuanmu tentang energi fosil dan energi alternatif sangat luar biasa. Pertahankan prestasimu, ya!`;
+                triggerCelebrationParticles(130);
+                playCorrectSfx();
+            } else if (finalScore >= 70) {
+                rankBadge.textContent = '🌟 PENJELAJAH ENERGI HEBAT';
+                motivationEl.textContent = `Kerja bagus, ${studentName}! Pemahamanmu tentang energi sudah sangat baik. Terus berlatih agar semakin mahir menjaga kelestarian energi bumi!`;
+                spokenResult = `Selamat ${studentName}! Nilai akhirmu adalah ${finalScore}. Kamu adalah Penjelajah Energi Hebat! Terus semangat belajar dan jaga bumi kita dengan energi bersih, ya!`;
+                triggerCelebrationParticles(95);
+                playCorrectSfx();
+            } else {
+                rankBadge.textContent = '🚀 PEJUANG ENERGI PANTANG MENYERAH';
+                motivationEl.textContent = `Terima kasih sudah berjuang dengan hebat, ${studentName}! Setiap petualangan adalah kesempatan belajar. Yuk, coba ulangi kuisnya untuk meraih nilai yang lebih tinggi!`;
+                spokenResult = `Terima kasih sudah berpetualang, ${studentName}! Nilai akhirmu adalah ${finalScore}. Jangan pernah menyerah, karena setiap latihan membuatmu semakin pintar. Ayo coba lagi dan tunjukkan kemampuan terbaikmu!`;
+                triggerCelebrationParticles(60);
+                playCorrectSfx();
+            }
+
+            speakIndonesian(spokenResult);
+        }
+
+        function replayQuiz() {
+            if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+            resetQuizData();
+            switchScreen('screen-quiz');
+            setMascotMood('thinking');
+            renderQuestion();
+            speakIndonesian(`Ayo kita mulai petualangan baru, ${studentName}! Semangat!`);
+        }
+
+        function returnToHome() {
+            if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+            switchScreen('screen-login');
+
+            // Move 3D Mascot back to Login Screen slot
+            const mascotBox = document.getElementById('mascot-canvas-box');
+            document.getElementById('login-mascot-slot').appendChild(mascotBox);
+            setMascotMood('welcome');
+        }
+    </script>
+</body>
+</html>
